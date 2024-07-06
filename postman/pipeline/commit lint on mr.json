@@ -1,0 +1,229 @@
+{
+  "object_kind": "pipeline",
+  "object_attributes": {
+    "id": 9562,
+    "iid": 7787,
+    "name": null,
+    "ref": "ci/commitlint",
+    "tag": false,
+    "sha": "d5473ac6b63f804598d5e9071804e54582c2db57",
+    "before_sha": "0000000000000000000000000000000000000000",
+    "source": "merge_request_event",
+    "status": "failed",
+    "detailed_status": "failed",
+    "stages": [
+      "prepare",
+      "mr"
+    ],
+    "created_at": "2024-06-10 00:49:37 +0300",
+    "finished_at": "2024-06-10 00:52:21 +0300",
+    "duration": 161,
+    "queued_duration": 2,
+    "variables": [
+
+    ],
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/pipelines/9562"
+  },
+  "merge_request": {
+    "id": 8582,
+    "iid": 3800,
+    "title": "feat: commitlint on mr",
+    "source_branch": "ci/commitlint",
+    "source_project_id": 208,
+    "target_branch": "51",
+    "target_project_id": 208,
+    "state": "opened",
+    "merge_status": "can_be_merged",
+    "detailed_merge_status": "ci_must_pass",
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/merge_requests/3800"
+  },
+  "user": {
+    "id": 102,
+    "name": "Станислав Сиротинин",
+    "username": "SSirotinin",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+    "email": "[REDACTED]"
+  },
+  "project": {
+    "id": 208,
+    "name": "REA Axioma UI",
+    "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+    "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+    "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "namespace": "rea",
+    "visibility_level": 0,
+    "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+    "default_branch": "51",
+    "ci_config_path": null
+  },
+  "commit": {
+    "id": "d5473ac6b63f804598d5e9071804e54582c2db57",
+    "message": "feat: commitlint on mr\n",
+    "title": "feat: commitlint on mr",
+    "timestamp": "2024-06-10T00:49:31+03:00",
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/commit/d5473ac6b63f804598d5e9071804e54582c2db57",
+    "author": {
+      "name": "SSirotinin",
+      "email": "[REDACTED]"
+    }
+  },
+  "builds": [
+    {
+      "id": 19437,
+      "stage": "mr",
+      "name": "commit lint",
+      "status": "failed",
+      "created_at": "2024-06-10 00:49:37 +0300",
+      "started_at": "2024-06-10 00:50:04 +0300",
+      "finished_at": "2024-06-10 00:51:13 +0300",
+      "duration": 68.63579,
+      "queued_duration": 0.923725,
+      "failure_reason": "script_failure",
+      "when": "always",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": {
+        "id": 4,
+        "description": "163-tester",
+        "runner_type": "project_type",
+        "active": true,
+        "is_shared": false,
+        "tags": [
+          "testing",
+          "prune",
+          "mr"
+        ]
+      },
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    },
+    {
+      "id": 19434,
+      "stage": "prepare",
+      "name": "build test image",
+      "status": "success",
+      "created_at": "2024-06-10 00:49:37 +0300",
+      "started_at": "2024-06-10 00:49:39 +0300",
+      "finished_at": "2024-06-10 00:50:03 +0300",
+      "duration": 23.840229,
+      "queued_duration": 1.15373,
+      "failure_reason": null,
+      "when": "always",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": {
+        "id": 45,
+        "description": "",
+        "runner_type": "project_type",
+        "active": true,
+        "is_shared": false,
+        "tags": [
+          "testing",
+          "mr"
+        ]
+      },
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    },
+    {
+      "id": 19436,
+      "stage": "mr",
+      "name": "code quality",
+      "status": "success",
+      "created_at": "2024-06-10 00:49:37 +0300",
+      "started_at": "2024-06-10 00:50:04 +0300",
+      "finished_at": "2024-06-10 00:52:21 +0300",
+      "duration": 137.485736,
+      "queued_duration": 0.684081,
+      "failure_reason": null,
+      "when": "on_success",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": {
+        "id": 4,
+        "description": "163-tester",
+        "runner_type": "project_type",
+        "active": true,
+        "is_shared": false,
+        "tags": [
+          "testing",
+          "prune",
+          "mr"
+        ]
+      },
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    },
+    {
+      "id": 19435,
+      "stage": "mr",
+      "name": "test code compiles",
+      "status": "success",
+      "created_at": "2024-06-10 00:49:37 +0300",
+      "started_at": "2024-06-10 00:50:03 +0300",
+      "finished_at": "2024-06-10 00:51:06 +0300",
+      "duration": 63.204856,
+      "queued_duration": 0.522901,
+      "failure_reason": null,
+      "when": "on_success",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": {
+        "id": 4,
+        "description": "163-tester",
+        "runner_type": "project_type",
+        "active": true,
+        "is_shared": false,
+        "tags": [
+          "testing",
+          "prune",
+          "mr"
+        ]
+      },
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    }
+  ]
+}

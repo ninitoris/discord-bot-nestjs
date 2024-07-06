@@ -1,0 +1,193 @@
+{
+  "object_kind": "pipeline",
+  "object_attributes": {
+    "id": 7389,
+    "iid": 6235,
+    "name": null,
+    "ref": "51",
+    "tag": false,
+    "sha": "ae349dfc666f62aef2f7e067065cb39a59480486",
+    "before_sha": "6768c6c98c71b98dbc1b17e933b134f5c6ec5cc5",
+    "source": "push",
+    "status": "manual",
+    "detailed_status": "waiting for manual action",
+    "stages": [
+      "build",
+      "deploy",
+      "prune"
+    ],
+    "created_at": "2024-04-05 16:46:27 +0300",
+    "finished_at": null,
+    "duration": 217,
+    "queued_duration": 1,
+    "variables": [
+
+    ],
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/pipelines/7389"
+  },
+  "merge_request": null,
+  "user": {
+    "id": 169,
+    "name": "Daniil Taranenko",
+    "username": "taranenko",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/169/avatar.png",
+    "email": "[REDACTED]"
+  },
+  "project": {
+    "id": 208,
+    "name": "REA Axioma UI",
+    "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+    "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+    "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "namespace": "rea",
+    "visibility_level": 0,
+    "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+    "default_branch": "51",
+    "ci_config_path": null
+  },
+  "commit": {
+    "id": "ae349dfc666f62aef2f7e067065cb39a59480486",
+    "message": "Merge branch 'fix/odk_rs_note/AX2-914+AX2-915' into '51'\n\nfix: edit translate button\n\nSee merge request ipc/axioma/axi/rea/rea-axioma-ui!3154",
+    "title": "Merge branch 'fix/odk_rs_note/AX2-914+AX2-915' into '51'",
+    "timestamp": "2024-04-05T16:46:25+03:00",
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/commit/ae349dfc666f62aef2f7e067065cb39a59480486",
+    "author": {
+      "name": "Daniil Taranenko",
+      "email": "[REDACTED]"
+    }
+  },
+  "builds": [
+    {
+      "id": 12725,
+      "stage": "build",
+      "name": "build docker image",
+      "status": "success",
+      "created_at": "2024-04-05 17:06:46 +0300",
+      "started_at": "2024-04-05 17:06:48 +0300",
+      "finished_at": "2024-04-05 17:10:21 +0300",
+      "duration": 213.088156,
+      "queued_duration": 2.289496,
+      "failure_reason": null,
+      "when": "always",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": {
+        "id": 16,
+        "description": "163-deployer",
+        "runner_type": "project_type",
+        "active": true,
+        "is_shared": false,
+        "tags": [
+          "deploy"
+        ]
+      },
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    },
+    {
+      "id": 12729,
+      "stage": "deploy",
+      "name": "deploy",
+      "status": "failed",
+      "created_at": "2024-04-05 17:36:48 +0300",
+      "started_at": "2024-04-05 17:36:50 +0300",
+      "finished_at": "2024-04-05 17:36:54 +0300",
+      "duration": 4.405299,
+      "queued_duration": 1.370224,
+      "failure_reason": "script_failure",
+      "when": "on_success",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": {
+        "id": 16,
+        "description": "163-deployer",
+        "runner_type": "project_type",
+        "active": true,
+        "is_shared": false,
+        "tags": [
+          "deploy"
+        ]
+      },
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    },
+    {
+      "id": 12720,
+      "stage": "build",
+      "name": "build dist to artifacts",
+      "status": "manual",
+      "created_at": "2024-04-05 16:46:27 +0300",
+      "started_at": null,
+      "finished_at": null,
+      "duration": null,
+      "queued_duration": null,
+      "failure_reason": null,
+      "when": "manual",
+      "manual": true,
+      "allow_failure": false,
+      "user": {
+        "id": 169,
+        "name": "Daniil Taranenko",
+        "username": "taranenko",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/169/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": null,
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    },
+    {
+      "id": 12723,
+      "stage": "prune",
+      "name": "prune",
+      "status": "skipped",
+      "created_at": "2024-04-05 16:46:27 +0300",
+      "started_at": null,
+      "finished_at": null,
+      "duration": null,
+      "queued_duration": null,
+      "failure_reason": null,
+      "when": "on_success",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": null,
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    }
+  ]
+}

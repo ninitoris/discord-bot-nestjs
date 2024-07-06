@@ -1,0 +1,78 @@
+{
+  "object_kind": "build",
+  "ref": "refs/merge-requests/13/head",
+  "tag": false,
+  "before_sha": "0000000000000000000000000000000000000000",
+  "sha": "8075e90c8b7cb952748b0659f69b974c6062481a",
+  "retries_count": 0,
+  "build_id": 23076,
+  "build_name": "build test image",
+  "build_stage": "testing",
+  "build_status": "running",
+  "build_created_at": "2024-07-06 08:55:17 +0300",
+  "build_started_at": "2024-07-06 08:55:21 +0300",
+  "build_finished_at": null,
+  "build_duration": 0.121896907,
+  "build_queued_duration": 3.284643953,
+  "build_allow_failure": false,
+  "build_failure_reason": "unknown_failure",
+  "pipeline_id": 10550,
+  "runner": {
+    "id": 34,
+    "description": "test-runner",
+    "runner_type": "project_type",
+    "active": true,
+    "is_shared": false,
+    "tags": [
+      "testing",
+      "deploy",
+      "test"
+    ]
+  },
+  "project_id": 337,
+  "project_name": "Станислав Сиротинин / REA Axioma UI Copy",
+  "user": {
+    "id": 102,
+    "name": "Станислав Сиротинин",
+    "username": "SSirotinin",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+    "email": "[REDACTED]"
+  },
+  "commit": {
+    "id": 10550,
+    "name": null,
+    "sha": "8075e90c8b7cb952748b0659f69b974c6062481a",
+    "message": "new\n",
+    "author_name": "Sergey Loginov",
+    "author_email": "[REDACTED]",
+    "author_url": "mailto:robert.tappan1965@gmail.com",
+    "status": "pending",
+    "duration": null,
+    "started_at": null,
+    "finished_at": null
+  },
+  "repository": {
+    "name": "REA Axioma UI Copy",
+    "url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+    "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+    "homepage": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy",
+    "git_http_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy.git",
+    "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+    "visibility_level": 0
+  },
+  "project": {
+    "id": 337,
+    "name": "REA Axioma UI Copy",
+    "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+    "web_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/337/UI_REA.jpg",
+    "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+    "git_http_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy.git",
+    "namespace": "Станислав Сиротинин",
+    "visibility_level": 0,
+    "path_with_namespace": "SSirotinin/rea-axioma-ui-copy",
+    "default_branch": "51",
+    "ci_config_path": null
+  },
+  "environment": null
+}

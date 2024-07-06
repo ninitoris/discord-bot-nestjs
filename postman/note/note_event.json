@@ -1,0 +1,227 @@
+{
+    "object_kind": "note",
+    "event_type": "note",
+    "user": {
+      "id": 149,
+      "name": "Василий Кочетков",
+      "username": "VKochetkov",
+      "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/149/avatar.png",
+      "email": "[REDACTED]"
+    },
+    "project_id": 208,
+    "project": {
+      "id": 208,
+      "name": "REA Axioma UI",
+      "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+      "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+      "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+      "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "namespace": "rea",
+      "visibility_level": 0,
+      "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+      "default_branch": "main",
+      "ci_config_path": null,
+      "homepage": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+      "url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git"
+    },
+    "object_attributes": {
+      "attachment": null,
+      "author_id": 149,
+      "change_position": {
+        "base_sha": "13b4c81d599aa5a224b415cf8af1c71c0802c824",
+        "start_sha": "13b4c81d599aa5a224b415cf8af1c71c0802c824",
+        "head_sha": "bd14e574fc4c9c134402d50077bb0a2fd853ffcc",
+        "old_path": "src/customize/reat/reattmlocations/main/ReattmLocationsMainDataset.js",
+        "new_path": "src/customize/reat/reattmlocations/main/ReattmLocationsMainDataset.js",
+        "position_type": "text",
+        "old_line": 473,
+        "new_line": null,
+        "line_range": {
+          "start": {
+            "line_code": "14c1f3b7c191c696760a56cbea8b97abe920ec6f_472_473",
+            "type": "new",
+            "old_line": null,
+            "new_line": 473
+          },
+          "end": {
+            "line_code": "14c1f3b7c191c696760a56cbea8b97abe920ec6f_472_473",
+            "type": "new",
+            "old_line": null,
+            "new_line": 473
+          }
+        }
+      },
+      "commit_id": null,
+      "created_at": "2023-10-25 15:34:21 +0300",
+      "discussion_id": "f90117c9378091db50a6201fd7a18a90fae75a68",
+      "id": 44782,
+      "line_code": "14c1f3b7c191c696760a56cbea8b97abe920ec6f_472_473",
+      "note": "теперь точно всё норм",
+      "noteable_id": 4259,
+      "noteable_type": "MergeRequest",
+      "original_position": {
+        "base_sha": "acd98444745226cc005e54ddb0e14c39db315a24",
+        "start_sha": "acd98444745226cc005e54ddb0e14c39db315a24",
+        "head_sha": "b80a41c6493877b581a8f1fe1e40247622d46f03",
+        "old_path": "src/customize/reat/reattmlocations/main/ReattmLocationsMainDataset.js",
+        "new_path": "src/customize/reat/reattmlocations/main/ReattmLocationsMainDataset.js",
+        "position_type": "text",
+        "old_line": null,
+        "new_line": 473,
+        "line_range": {
+          "start": {
+            "line_code": "14c1f3b7c191c696760a56cbea8b97abe920ec6f_472_473",
+            "type": "new",
+            "old_line": null,
+            "new_line": 473
+          },
+          "end": {
+            "line_code": "14c1f3b7c191c696760a56cbea8b97abe920ec6f_472_473",
+            "type": "new",
+            "old_line": null,
+            "new_line": 473
+          }
+        }
+      },
+      "position": {
+        "base_sha": "a15073dbab64969a39d78a054ebaea330732d574",
+        "start_sha": "acd98444745226cc005e54ddb0e14c39db315a24",
+        "head_sha": "13b4c81d599aa5a224b415cf8af1c71c0802c824",
+        "old_path": "src/customize/reat/reattmlocations/main/ReattmLocationsMainDataset.js",
+        "new_path": "src/customize/reat/reattmlocations/main/ReattmLocationsMainDataset.js",
+        "position_type": "text",
+        "old_line": null,
+        "new_line": 473,
+        "line_range": {
+          "start": {
+            "line_code": "14c1f3b7c191c696760a56cbea8b97abe920ec6f_472_473",
+            "type": "new",
+            "old_line": null,
+            "new_line": 473
+          },
+          "end": {
+            "line_code": "14c1f3b7c191c696760a56cbea8b97abe920ec6f_472_473",
+            "type": "new",
+            "old_line": null,
+            "new_line": 473
+          }
+        }
+      },
+      "project_id": 208,
+      "resolved_at": null,
+      "resolved_by_id": null,
+      "resolved_by_push": null,
+      "st_diff": null,
+      "system": false,
+      "type": "DiffNote",
+      "updated_at": "2023-10-25 15:34:21 +0300",
+      "updated_by_id": null,
+      "description": "теперь точно всё норм",
+      "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/merge_requests/1433#note_44782"
+    },
+    "repository": {
+      "name": "REA Axioma UI",
+      "url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+      "homepage": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui"
+    },
+    "merge_request": {
+      "assignee_id": 113,
+      "author_id": 149,
+      "created_at": "2023-10-25 15:13:47 +0300",
+      "description": "Closes AX-663",
+      "head_pipeline_id": 1960,
+      "id": 4259,
+      "iid": 1433,
+      "last_edited_at": null,
+      "last_edited_by_id": null,
+      "merge_commit_sha": null,
+      "merge_error": null,
+      "merge_params": {
+        "force_remove_source_branch": "1"
+      },
+      "merge_status": "unchecked",
+      "merge_user_id": null,
+      "merge_when_pipeline_succeeds": false,
+      "milestone_id": null,
+      "source_branch": "fix/reattmlocations/AX-663",
+      "source_project_id": 208,
+      "state_id": 1,
+      "target_branch": "202",
+      "target_project_id": 208,
+      "time_estimate": 0,
+      "title": "AX-663 - update 2 полей для системы",
+      "updated_at": "2023-10-25 15:34:03 +0300",
+      "updated_by_id": null,
+      "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/merge_requests/1433",
+      "source": {
+        "id": 208,
+        "name": "REA Axioma UI",
+        "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+        "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+        "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+        "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+        "namespace": "rea",
+        "visibility_level": 0,
+        "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+        "default_branch": "main",
+        "ci_config_path": null,
+        "homepage": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+        "url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+        "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+        "http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git"
+      },
+      "target": {
+        "id": 208,
+        "name": "REA Axioma UI",
+        "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+        "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+        "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+        "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+        "namespace": "rea",
+        "visibility_level": 0,
+        "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+        "default_branch": "main",
+        "ci_config_path": null,
+        "homepage": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+        "url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+        "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+        "http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git"
+      },
+      "last_commit": {
+        "id": "bd14e574fc4c9c134402d50077bb0a2fd853ffcc",
+        "message": "final update\n",
+        "title": "final update",
+        "timestamp": "2023-10-25T15:33:46+03:00",
+        "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/commit/bd14e574fc4c9c134402d50077bb0a2fd853ffcc",
+        "author": {
+          "name": "Vasiliy Kochetkov",
+          "email": "[REDACTED]"
+        }
+      },
+      "work_in_progress": false,
+      "total_time_spent": 0,
+      "time_change": 0,
+      "human_total_time_spent": null,
+      "human_time_change": null,
+      "human_time_estimate": null,
+      "assignee_ids": [
+        113
+      ],
+      "reviewer_ids": [
+        148
+      ],
+      "labels": [
+  
+      ],
+      "state": "opened",
+      "blocking_discussions_resolved": true,
+      "first_contribution": false,
+      "detailed_merge_status": "unchecked"
+    }
+  }

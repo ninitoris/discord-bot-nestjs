@@ -1,0 +1,143 @@
+{
+  "object_kind": "merge_request",
+  "event_type": "merge_request",
+  "user": {
+    "id": 102,
+    "name": "Станислав Сиротинин",
+    "username": "SSirotinin",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+    "email": "[REDACTED]"
+  },
+  "project": {
+    "id": 337,
+    "name": "REA Axioma UI Copy",
+    "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+    "web_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/337/UI_REA.jpg",
+    "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+    "git_http_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy.git",
+    "namespace": "Станислав Сиротинин",
+    "visibility_level": 0,
+    "path_with_namespace": "SSirotinin/rea-axioma-ui-copy",
+    "default_branch": "51",
+    "ci_config_path": null,
+    "homepage": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy",
+    "url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+    "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+    "http_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy.git"
+  },
+  "object_attributes": {
+    "assignee_id": null,
+    "author_id": 102,
+    "created_at": "2024-07-06 08:55:15 +0300",
+    "description": "\n## Краткое описание:\nТутДолжноБылоБытьОписаниеМРаНоМнеПофигТакЧтоМрМожноЗакрыть\n\n\n## Чеклист:\n- [ ] МР готов к завершению. Все внесенные изменения протестированы мною и не вызывают необработанных ошибок. (проставляется создателем МРа)\n\n<details>\n<summary><strong>Список изменений</strong></summary>\n\n* new\n\n* commit\n\n* commit\n\n* new\n\n* fix:clown\n\n</details>",
+    "draft": false,
+    "head_pipeline_id": 10550,
+    "id": 9165,
+    "iid": 13,
+    "last_edited_at": null,
+    "last_edited_by_id": null,
+    "merge_commit_sha": null,
+    "merge_error": null,
+    "merge_params": {
+      "force_remove_source_branch": "1"
+    },
+    "merge_status": "checking",
+    "merge_user_id": null,
+    "merge_when_pipeline_succeeds": false,
+    "milestone_id": null,
+    "source_branch": "clown",
+    "source_project_id": 337,
+    "state_id": 1,
+    "target_branch": "51",
+    "target_project_id": 337,
+    "time_estimate": 0,
+    "title": "Clown",
+    "updated_at": "2024-07-06 08:55:18 +0300",
+    "updated_by_id": null,
+    "prepared_at": "2024-07-06 08:55:18 +0300",
+    "url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy/-/merge_requests/13",
+    "source": {
+      "id": 337,
+      "name": "REA Axioma UI Copy",
+      "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+      "web_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy",
+      "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/337/UI_REA.jpg",
+      "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+      "git_http_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy.git",
+      "namespace": "Станислав Сиротинин",
+      "visibility_level": 0,
+      "path_with_namespace": "SSirotinin/rea-axioma-ui-copy",
+      "default_branch": "51",
+      "ci_config_path": null,
+      "homepage": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy",
+      "url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+      "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+      "http_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy.git"
+    },
+    "target": {
+      "id": 337,
+      "name": "REA Axioma UI Copy",
+      "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+      "web_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy",
+      "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/337/UI_REA.jpg",
+      "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+      "git_http_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy.git",
+      "namespace": "Станислав Сиротинин",
+      "visibility_level": 0,
+      "path_with_namespace": "SSirotinin/rea-axioma-ui-copy",
+      "default_branch": "51",
+      "ci_config_path": null,
+      "homepage": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy",
+      "url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+      "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+      "http_url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy.git"
+    },
+    "last_commit": {
+      "id": "8075e90c8b7cb952748b0659f69b974c6062481a",
+      "message": "new\n",
+      "title": "new",
+      "timestamp": "2024-05-08T15:01:05+03:00",
+      "url": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy/-/commit/8075e90c8b7cb952748b0659f69b974c6062481a",
+      "author": {
+        "name": "Sergey Loginov",
+        "email": "[REDACTED]"
+      }
+    },
+    "work_in_progress": false,
+    "total_time_spent": 0,
+    "time_change": 0,
+    "human_total_time_spent": null,
+    "human_time_change": null,
+    "human_time_estimate": null,
+    "assignee_ids": [],
+    "reviewer_ids": [],
+    "labels": [],
+    "state": "opened",
+    "blocking_discussions_resolved": true,
+    "first_contribution": false,
+    "detailed_merge_status": "checking",
+    "action": "open"
+  },
+  "labels": [],
+  "changes": {
+    "merge_status": {
+      "previous": "preparing",
+      "current": "checking"
+    },
+    "updated_at": {
+      "previous": "2024-07-06 08:55:15 +0300",
+      "current": "2024-07-06 08:55:18 +0300"
+    },
+    "prepared_at": {
+      "previous": null,
+      "current": "2024-07-06 08:55:18 +0300"
+    }
+  },
+  "repository": {
+    "name": "REA Axioma UI Copy",
+    "url": "ssh://git@gitlab.interprocom.ru:10022/SSirotinin/rea-axioma-ui-copy.git",
+    "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+    "homepage": "https://gitlab.interprocom.ru/SSirotinin/rea-axioma-ui-copy"
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "object_kind": "emoji",
+  "event_type": "award",
+  "user": {
+    "id": 102,
+    "name": "Станислав Сиротинин",
+    "username": "SSirotinin",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+    "email": "[REDACTED]"
+  },
+  "project_id": 208,
+  "project": {
+    "id": 208,
+    "name": "REA Axioma UI",
+    "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+    "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+    "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "namespace": "rea",
+    "visibility_level": 0,
+    "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+    "default_branch": "51",
+    "ci_config_path": null,
+    "homepage": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+    "url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git"
+  },
+  "object_attributes": {
+    "user_id": 102,
+    "created_at": "2024-03-05 15:23:32 +0300",
+    "id": 588,
+    "name": "wrestlers_tone1",
+    "awardable_type": "MergeRequest",
+    "awardable_id": 6326,
+    "updated_at": "2024-03-05 15:23:32 +0300",
+    "awarded_on_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/merge_requests/2660"
+  },
+  "merge_request": {
+    "assignee_id": 102,
+    "author_id": 67,
+    "created_at": "2024-02-26 16:38:31 +0300",
+    "description": "\n## Краткое описание:\nСоздание двух скриптовых кнопок\n\n\n## Чеклист:\n- [x] МР готов к завершению. Все внесенные изменения протестированы мною и не вызывают необработанных ошибкок\n\n<details>\n<summary><strong>Список изменений</strong></summary>\n\n* fix AX1-1683 and AX1-1684\n\n</details>\n\n\nRelated to AX1-1683 and AX1-1684",
+    "draft": false,
+    "head_pipeline_id": 5526,
+    "id": 6326,
+    "iid": 2660,
+    "last_edited_at": "2024-02-26 16:51:17 +0300",
+    "last_edited_by_id": 67,
+    "merge_commit_sha": "12d41c8d231d9dec88c6501a405dbaaf996fa193",
+    "merge_error": null,
+    "merge_params": {
+      "force_remove_source_branch": "1",
+      "auto_merge_strategy": "merge_when_pipeline_succeeds",
+      "should_remove_source_branch": true,
+      "commit_message": "Merge branch 'fix/reatorders/AX1-1683' into '51'\n\nfix script buttons\n\nSee merge request ipc/axioma/axi/rea/rea-axioma-ui!2660",
+      "squash_commit_message": "fix script buttons",
+      "sha": "a59368f85d2c13f06cc1fee867d99b2dbe340302"
+    },
+    "merge_status": "can_be_merged",
+    "merge_user_id": 102,
+    "merge_when_pipeline_succeeds": true,
+    "milestone_id": null,
+    "source_branch": "fix/reatorders/AX1-1683",
+    "source_project_id": 208,
+    "state_id": 3,
+    "target_branch": "51",
+    "target_project_id": 208,
+    "time_estimate": 0,
+    "title": "fix script buttons",
+    "updated_at": "2024-02-27 15:25:56 +0300",
+    "updated_by_id": 67,
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/merge_requests/2660",
+    "source": {
+      "id": 208,
+      "name": "REA Axioma UI",
+      "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+      "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+      "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+      "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "namespace": "rea",
+      "visibility_level": 0,
+      "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+      "default_branch": "51",
+      "ci_config_path": null,
+      "homepage": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+      "url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git"
+    },
+    "target": {
+      "id": 208,
+      "name": "REA Axioma UI",
+      "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+      "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+      "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+      "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "namespace": "rea",
+      "visibility_level": 0,
+      "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+      "default_branch": "51",
+      "ci_config_path": null,
+      "homepage": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+      "url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+      "http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git"
+    },
+    "last_commit": {
+      "id": "a59368f85d2c13f06cc1fee867d99b2dbe340302",
+      "message": "cond\n",
+      "title": "cond",
+      "timestamp": "2024-02-27T15:21:22+03:00",
+      "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/commit/a59368f85d2c13f06cc1fee867d99b2dbe340302",
+      "author": {
+        "name": "DYang",
+        "email": "[REDACTED]"
+      }
+    },
+    "work_in_progress": false,
+    "total_time_spent": 0,
+    "time_change": 0,
+    "human_total_time_spent": null,
+    "human_time_change": null,
+    "human_time_estimate": null,
+    "assignee_ids": [
+      102
+    ],
+    "reviewer_ids": [
+      166
+    ],
+    "labels": [
+
+    ],
+    "state": "merged",
+    "blocking_discussions_resolved": true,
+    "first_contribution": false,
+    "detailed_merge_status": "not_open"
+  }
+}

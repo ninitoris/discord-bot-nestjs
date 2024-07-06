@@ -1,0 +1,147 @@
+{
+  "object_kind": "pipeline",
+  "object_attributes": {
+    "id": 9023,
+    "iid": 7358,
+    "name": null,
+    "ref": "test/webhooks",
+    "tag": false,
+    "sha": "39944145ad2bf6ef0960add09efa522ce8f02fe8",
+    "before_sha": "0000000000000000000000000000000000000000",
+    "source": "merge_request_event",
+    "status": "failed",
+    "detailed_status": "failed",
+    "stages": [
+      "testing"
+    ],
+    "created_at": "2024-05-24 14:09:14 +0300",
+    "finished_at": "2024-05-27 10:52:15 +0300",
+    "duration": 368,
+    "queued_duration": 1,
+    "variables": [
+
+    ],
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/pipelines/9023"
+  },
+  "merge_request": {
+    "id": 8297,
+    "iid": 3638,
+    "title": "test: удалил ненужные файлы",
+    "source_branch": "test/webhooks",
+    "source_project_id": 208,
+    "target_branch": "51",
+    "target_project_id": 208,
+    "state": "opened",
+    "merge_status": "cannot_be_merged",
+    "detailed_merge_status": "broken_status",
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/merge_requests/3638"
+  },
+  "user": {
+    "id": 102,
+    "name": "Станислав Сиротинин",
+    "username": "SSirotinin",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+    "email": "[REDACTED]"
+  },
+  "project": {
+    "id": 208,
+    "name": "REA Axioma UI",
+    "description": "Разработка Аксиома UI для РЭА ТОРЭКС",
+    "web_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui",
+    "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/project/avatar/208/UI_REA.jpg",
+    "git_ssh_url": "ssh://git@gitlab.interprocom.ru:10022/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "git_http_url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui.git",
+    "namespace": "rea",
+    "visibility_level": 0,
+    "path_with_namespace": "ipc/axioma/axi/rea/rea-axioma-ui",
+    "default_branch": "51",
+    "ci_config_path": null
+  },
+  "commit": {
+    "id": "39944145ad2bf6ef0960add09efa522ce8f02fe8",
+    "message": "test: удалил ненужные файлы\n",
+    "title": "test: удалил ненужные файлы",
+    "timestamp": "2024-05-24T14:08:58+03:00",
+    "url": "https://gitlab.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/-/commit/39944145ad2bf6ef0960add09efa522ce8f02fe8",
+    "author": {
+      "name": "SSirotinin",
+      "email": "[REDACTED]"
+    }
+  },
+  "builds": [
+    {
+      "id": 17595,
+      "stage": "testing",
+      "name": "build test image",
+      "status": "success",
+      "created_at": "2024-05-24 14:09:14 +0300",
+      "started_at": "2024-05-24 14:09:15 +0300",
+      "finished_at": "2024-05-24 14:09:33 +0300",
+      "duration": 17.478732,
+      "queued_duration": 0.483019,
+      "failure_reason": null,
+      "when": "always",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": {
+        "id": 45,
+        "description": "",
+        "runner_type": "project_type",
+        "active": true,
+        "is_shared": false,
+        "tags": [
+          "testing"
+        ]
+      },
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    },
+    {
+      "id": 17769,
+      "stage": "testing",
+      "name": "test code compiles",
+      "status": "failed",
+      "created_at": "2024-05-27 10:46:23 +0300",
+      "started_at": "2024-05-27 10:46:24 +0300",
+      "finished_at": "2024-05-27 10:52:15 +0300",
+      "duration": 351.265354,
+      "queued_duration": 0.862565,
+      "failure_reason": "script_failure",
+      "when": "on_success",
+      "manual": false,
+      "allow_failure": false,
+      "user": {
+        "id": 102,
+        "name": "Станислав Сиротинин",
+        "username": "SSirotinin",
+        "avatar_url": "https://gitlab.interprocom.ru/uploads/-/system/user/avatar/102/avatar.png",
+        "email": "[REDACTED]"
+      },
+      "runner": {
+        "id": 45,
+        "description": "",
+        "runner_type": "project_type",
+        "active": true,
+        "is_shared": false,
+        "tags": [
+          "testing"
+        ]
+      },
+      "artifacts_file": {
+        "filename": null,
+        "size": null
+      },
+      "environment": null
+    }
+  ]
+}
