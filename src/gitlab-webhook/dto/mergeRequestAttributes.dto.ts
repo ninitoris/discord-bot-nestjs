@@ -44,8 +44,10 @@ export class MergeRequestAttributesDto {
   readonly updated_at: any;
   readonly updated_by_id: any;
 
-  /**Репа В которую открыли МР */
-  readonly target: object;
+  /** Репа в которую открыли МР */
+  readonly target: {
+    name: string;
+  };
   // readonly source: object; // репа из которой открыли МР
   // readonly last_commit: object; // объект последнего коммита
 
