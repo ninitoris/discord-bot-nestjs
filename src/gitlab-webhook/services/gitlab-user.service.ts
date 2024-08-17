@@ -175,6 +175,7 @@ export class GitLabUserService {
   /** Возвращает либо пользователя GitLab по указанному ID, либо пользователя-заглушку */
   getUserById(userId: number): UserType {
     return this.gitlabUsersMap.get(userId) || this.dummyUser;
+    // Пользователь-заглушка используется для того, чтобы приложение не падало при отсутствии реального пользователя, например, когда новый сотрудник еще не был добавлен в базу
   }
 
   isFemale(userId: number): boolean {

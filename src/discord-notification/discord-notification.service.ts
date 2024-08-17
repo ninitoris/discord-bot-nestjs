@@ -2,9 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EmbedBuilder, WebhookClient } from 'discord.js';
 
 export type DiscordNotificationType = {
-  /** Как будет подписан пользователь, который отправил сообщение */
-  username: string;
-
   /** Заголовок уведомления, располагается над embed-ом, является по сути обычным текстом в сообщении */
   notificationTitle: string;
 
@@ -22,6 +19,9 @@ export type DiscordNotificationType = {
 
   /** Ссылка на картинку, которая будет использована в качесве аватарки */
   avatarURL?: string;
+
+  /** Как будет подписан пользователь, который отправил сообщение */
+  username: string;
 };
 
 @Injectable()

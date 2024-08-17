@@ -15,6 +15,11 @@ export class GitlabUtilityService {
   public readonly gitlabLogo =
     'https://static-00.iconduck.com/assets.00/gitlab-icon-2048x1885-1o0cwkbx.png';
   public readonly gitlabBotName = 'GitLab';
+  public readonly defaultNotificationTemplate = {
+    embedColor: this.gitlabColor,
+    avatarURL: this.gitlabLogo,
+    username: this.gitlabBotName,
+  };
 
   /** Возвращает человека, от которого требуется следующее действие в МРе.
    * Если ревьюер еще не апрувнул, то это будет он.

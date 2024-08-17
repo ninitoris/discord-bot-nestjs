@@ -126,9 +126,7 @@ export class MergeRequestService {
       embedTitle,
       embedDescription,
       embedUrl: objectAttributes.url,
-      embedColor: this.gitlabUtils.gitlabColor,
-      avatarURL: this.gitlabUtils.gitlabLogo,
-      username: this.gitlabUtils.gitlabBotName,
+      ...this.gitlabUtils.defaultNotificationTemplate,
     };
 
     this.discordNotificationService.sendNotification(notification);
@@ -137,13 +135,13 @@ export class MergeRequestService {
 
   async handleMergeRequestApproved(
     objectAttributes: MergeRequestAttributesDto,
-    user: GitlabUserDto,
+    gitlabUser: GitlabUserDto,
   ): Promise<void> {
     const reviewes = objectAttributes.reviewer_ids;
     console.log(reviewes);
-    console.log(user);
+    console.log(gitlabUser);
     // если МР апрувнут НЕ ревьюером, то уведомление не надо отправлять
-    if (!reviewes.includes(user.id)) {
+    if (!reviewes.includes(gitlabUser.id)) {
       return;
     }
 
@@ -152,6 +150,34 @@ export class MergeRequestService {
       await this.gitlabUtils.getNextReviewerOrAssigneeForMR(objectAttributes);
 
     if (!nextReviewer) return;
+
+    const tag = this.gitlabUserService.getDiscordTagsByUserIds(
+      [nextReviewer],
+      this.utils.isNowWorkingHours(),
+    );
+
+    const user = this.gitlabUserService.getUserById(gitlabUser.id);
+    const embedTitle = `${user.irlName} апрувнул${user.female ? 'а' : ''} МР`;
+
+    // опять же делаем поправку на бесплатный гитлаб. в платном мог бы быть еще один ревьюер, но тут далее идет только ассайни
+    let embedDescription = `Асайни: ${tag}\n`;
+    embedDescription += `[!${objectAttributes.iid}: ${objectAttributes.title}](${objectAttributes.url})\n`;
+    embedDescription += `\n${this.gitlabUtils.parseMergeRequestDescription(objectAttributes.description)}\n`;
+
+    embedDescription += this.gitlabUtils.addDefaultFooter({
+      repo: objectAttributes.target.name,
+      lastUpdateTime: objectAttributes.updated_at,
+    });
+
+    const notification: DiscordNotificationType = {
+      notificationTitle: `МР! ${tag}`,
+      embedTitle,
+      embedDescription,
+      embedUrl: objectAttributes.url,
+      ...this.gitlabUtils.defaultNotificationTemplate,
+    };
+    this.discordNotificationService.sendNotification(notification);
+    return;
   }
 
   handleMergeRequestUpdated() {
