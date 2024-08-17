@@ -1,11 +1,12 @@
 import { ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MergeRequestAttributesDto } from './mergeRequestAttributes.dto';
+import { GitlabUserDto } from '@src/gitlab-webhook/dto/gitlabUser.dto';
 
 export class MergeRequestDto {
   readonly object_kind: any;
   readonly event_type: any;
-  readonly user: any;
+  readonly user: GitlabUserDto;
   readonly project: any;
 
   @Type(() => MergeRequestAttributesDto)

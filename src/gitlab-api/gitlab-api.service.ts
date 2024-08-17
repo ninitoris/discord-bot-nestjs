@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ApproversType } from '@src/gitlab-webhook/gitlab-webhook.types';
+import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
 import axios, { AxiosInstance } from 'axios';
 
 @Injectable()
@@ -23,16 +23,16 @@ export class GitLabApiService {
     });
   }
 
-  async getMergeRequestApprovals(
+  async getMergeRequestApprovalsInfo(
     projectId: number,
     mergeRequestId: number,
-  ): Promise<ApproversType | null> {
+  ): Promise<IApprovalsInfo | null> {
     const url = `/${projectId}/merge_requests/${mergeRequestId}/approvals`;
     // console.log('querying: ' + process.env.GITLAB_API_URL + url);
     return this.axios
       .get(url)
       .then((res) => {
-        const approvals: ApproversType = res.data;
+        const approvals: IApprovalsInfo = res.data;
         return approvals;
       })
       .catch((error) => {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GitLabApiService } from '@src/gitlab-api/gitlab-api.service';
 import { MergeRequestAttributesDto } from '@src/gitlab-webhook/dto/mergeRequestAttributes.dto';
-import { ApproversType } from '@src/gitlab-webhook/gitlab-webhook.types';
+import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
 import { UtilsService } from '@src/utils/utils.service';
 
 @Injectable()
@@ -16,13 +16,19 @@ export class GitlabUtilityService {
     'https://static-00.iconduck.com/assets.00/gitlab-icon-2048x1885-1o0cwkbx.png';
   public readonly gitlabBotName = 'GitLab';
 
-  async getNextReviewerForMR(
+  /** Возвращает человека, от которого требуется следующее действие в МРе.
+   * Если ревьюер еще не апрувнул, то это будет он.
+   * Если ревьюера нет или он уже апрувнул, то это будет ассайни.
+   * Иначе это null.
+   *
+   * NB! не работает (скорее всего) в платном гитлабе, где можно поставить несколько ревьюеров на один МР */
+  async getNextReviewerOrAssigneeForMR(
     objectAttributes: MergeRequestAttributesDto,
-  ): Promise<number | null> {
-    let approvals: ApproversType | null = null;
+  ): Promise<number> {
+    let approvalsInfo: IApprovalsInfo | null = null;
 
     try {
-      approvals = await this.gitlabApiService.getMergeRequestApprovals(
+      approvalsInfo = await this.gitlabApiService.getMergeRequestApprovalsInfo(
         objectAttributes.target_project_id,
         objectAttributes.iid,
       );
@@ -36,23 +42,54 @@ export class GitlabUtilityService {
     /** Массив ревьюеров, в бесплатной версии гитлаба - 0 или 1 элемент */
     const reviewersIds: Array<number> = objectAttributes.reviewer_ids;
 
-    if (reviewersIds.length) {
-      if (approvals?.approved) {
-        // если кто-то апрувнул МР, то ищем ревьюера, который еще не апрувнул его
-        const approvedByIds = approvals.approved_by.map((user) => {
-          return user.user.id;
-        });
-        nextReviewer = reviewersIds.find((r) => !approvedByIds.includes(r));
-      } else {
-        nextReviewer = reviewersIds[0];
-      }
-    }
+    nextReviewer = this.getReviewerWhoDidNotApprove(
+      reviewersIds,
+      approvalsInfo,
+    );
 
     if (!nextReviewer) {
       nextReviewer = objectAttributes.assignee_id || null;
     }
 
     return nextReviewer;
+  }
+
+  isApprovalsInfo = (p: IApprovalsInfo | Array<number>): p is IApprovalsInfo =>
+    !Array.isArray(p);
+
+  /** Найти ревьюера, который еще не аппрувнул МР. Если такого нет, то возвращает null */
+  getReviewerWhoDidNotApprove(
+    reviewersIds: Array<number>,
+    approvalsIdsArray: Array<number>,
+  ): number;
+  getReviewerWhoDidNotApprove(
+    reviewersIds: Array<number>,
+    approvalsInfo: IApprovalsInfo,
+  ): number;
+  getReviewerWhoDidNotApprove(
+    reviewersIds: Array<number>,
+    approvalsInfo: IApprovalsInfo | Array<number>,
+  ): number | null | undefined {
+    if (!reviewersIds.length) {
+      return null;
+    }
+
+    let reviewer = null;
+    if (this.isApprovalsInfo(approvalsInfo)) {
+      console.log('it IS approvals info');
+      if (approvalsInfo?.approved) {
+        // если кто-то апрувнул МР, то ищем ревьюера, который еще не апрувнул его
+        const approvedByIds = approvalsInfo.approved_by.map((user) => {
+          return user.user.id;
+        });
+        reviewer = reviewersIds.find((r) => !approvedByIds.includes(r));
+      } else {
+        reviewer = reviewersIds[0];
+      }
+    } else {
+      // TODO: прошло 4 недели и я забыл, зачем добавил перегрузку с  Array<number>. Если вспомню, то доделать этот метод... ⚽️
+    }
+    return reviewer;
   }
 
   beautifyDescription(description: string) {

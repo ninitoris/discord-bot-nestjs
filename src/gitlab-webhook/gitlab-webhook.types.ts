@@ -2,10 +2,11 @@ import { GitlabUserDto } from '@src/gitlab-webhook/dto/gitlabUser.dto';
 
 export type WebhookType = 'merge_request' | 'note' | 'pipeline' | 'build';
 
-export type ApproversType = {
+export interface IApprovalsInfo {
   approved: boolean;
   approved_by: Array<{ user: GitlabUserDto }>;
-};
+}
+
 /*
 type ProjectType = {
   id: number;
