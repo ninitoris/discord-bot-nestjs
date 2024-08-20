@@ -97,7 +97,7 @@ export class GitlabUtilityService {
     return reviewer;
   }
 
-  beautifyDescription(description: string) {
+  private beautifyDescription(description: string) {
     return description
       .replaceAll(/\n{2,}/gm, '\n') // убрать все множественные переносы строк
       .trim()
@@ -122,8 +122,7 @@ export class GitlabUtilityService {
     } else return undefined;
   }
 
-  /** Возвращает либо краткое описание, либо текст из первого заголовка, либо исходную строку */
-  public parseMergeRequestDescription(description: string) {
+  private parseMergeRequestDescription(description: string) {
     const shortDescription = this.getMergeReuestShortDescription(description);
     if (shortDescription) return shortDescription;
 
@@ -133,6 +132,13 @@ export class GitlabUtilityService {
     return Array.isArray(str) && str[1]
       ? this.beautifyDescription(str[1])
       : description;
+  }
+
+  /** Возвращает либо краткое описание, либо текст из первого заголовка, либо исходную строку */
+  public addMergeRequestDescription(
+    objectAttributes: MergeRequestAttributesDto,
+  ) {
+    return `\n${this.parseMergeRequestDescription(objectAttributes.description)}\n`;
   }
 
   public addDefaultFooter({
@@ -151,5 +157,9 @@ export class GitlabUtilityService {
     footer += `${this.utils.getDateNow()}`;
 
     return footer;
+  }
+
+  public addMergeRequestInfo(objectAttributes: MergeRequestAttributesDto) {
+    return `[!${objectAttributes.iid}: ${objectAttributes.title}](${objectAttributes.url})\n`;
   }
 }
