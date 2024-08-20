@@ -65,7 +65,11 @@ export class MergeRequestService {
   ): Promise<void> {
     console.log('handle opening mr');
 
-    // TODO: при открытии МРа он может быть draft
+    // при открытии МРа он может быть draft
+    const isDraft = objectAttributes.draft;
+    if (isDraft) {
+      return;
+    }
 
     let nextReviewer: number | null = null;
     const assignee = objectAttributes.assignee_id;
@@ -140,6 +144,11 @@ export class MergeRequestService {
     objectAttributes: MergeRequestAttributesDto,
     gitlabUser: GitlabUserDto,
   ): Promise<void> {
+    const isDraft = objectAttributes.draft;
+    if (isDraft) {
+      return;
+    }
+
     const reviewes = objectAttributes.reviewer_ids;
     console.log(reviewes);
     console.log(gitlabUser);
@@ -190,7 +199,12 @@ export class MergeRequestService {
     gitlabUser: GitlabUserDto,
   ) {
     // изменен ревьюер
+    const isDraft = objectAttributes.draft;
     if (changes.reviewers && changes.reviewers.current.length) {
+      if (isDraft) {
+        return;
+      }
+
       const newReviewer: GitlabUserDto = changes.reviewers.current[0];
       const newReviewerId = newReviewer.id;
       let approvalsInfo: IApprovalsInfo;
@@ -245,6 +259,10 @@ export class MergeRequestService {
     }
     // изменен ассайни
     if (changes.assignees && changes.assignees.current.length) {
+      if (isDraft) {
+        return;
+      }
+
       const newAssignee: GitlabUserDto = changes.assignees.current[0];
       const newAssigneeId = newAssignee.id;
       const user = this.gitlabUserService.getUserById(gitlabUser.id);
@@ -275,6 +293,67 @@ export class MergeRequestService {
         ...this.gitlabUtils.defaultNotificationTemplate,
       };
       return this.discordNotificationService.sendNotification(notification);
+    }
+    // либо пометили мр как draft либо как ready
+    if (changes.draft) {
+      if (changes.draft.current !== false) return;
+
+      // draft.current === false -> marked mr as ready
+      const assignee = objectAttributes.assignee_id;
+      let approvalsInfo: IApprovalsInfo;
+
+      try {
+        approvalsInfo =
+          await this.gitlabApiService.getMergeRequestApprovalsInfo(
+            objectAttributes.target_project_id,
+            objectAttributes.iid,
+          );
+      } catch (error) {
+        console.log(error);
+        return;
+      }
+      const nextReviewer = this.gitlabUtils.getReviewerWhoDidNotApprove(
+        objectAttributes.reviewer_ids,
+        approvalsInfo,
+      );
+
+      if (!nextReviewer && !assignee) {
+        return;
+      }
+
+      const tag = this.gitlabUserService.getDiscordTagsByUserIds(
+        [nextReviewer || assignee],
+        this.utils.isNowWorkingHours(),
+      );
+
+      const user = this.gitlabUserService.getUserById(gitlabUser.id);
+      const embedTitle = `${user.irlName} пометил${user.female ? 'а' : ''} МР как готовый`;
+
+      let embedDescription = '';
+      if (nextReviewer) {
+        embedDescription += `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`;
+      } else {
+        `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`;
+      }
+      embedDescription +=
+        this.gitlabUtils.addMergeRequestInfo(objectAttributes);
+      embedDescription +=
+        this.gitlabUtils.addMergeRequestDescription(objectAttributes);
+
+      embedDescription += this.gitlabUtils.addDefaultFooter({
+        repo: objectAttributes.target.name,
+      });
+
+      const notification: DiscordNotificationType = {
+        notificationTitle: `МР! ${tag}`,
+        embedTitle,
+        embedDescription,
+        embedUrl: objectAttributes.url,
+        ...this.gitlabUtils.defaultNotificationTemplate,
+      };
+
+      this.discordNotificationService.sendNotification(notification);
+      return;
     }
     // других обработок нет
     return;

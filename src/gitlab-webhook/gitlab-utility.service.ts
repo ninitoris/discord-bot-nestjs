@@ -66,11 +66,11 @@ export class GitlabUtilityService {
   getReviewerWhoDidNotApprove(
     reviewersIds: Array<number>,
     approvalsIdsArray: Array<number>,
-  ): number;
+  ): number | null | undefined;
   getReviewerWhoDidNotApprove(
     reviewersIds: Array<number>,
     approvalsInfo: IApprovalsInfo,
-  ): number;
+  ): number | null | undefined;
   getReviewerWhoDidNotApprove(
     reviewersIds: Array<number>,
     approvalsInfo: IApprovalsInfo | Array<number>,

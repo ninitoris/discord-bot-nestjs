@@ -10,4 +10,9 @@ export class MergeRequestChangesDto {
     previous: GitlabUserDto[];
     current: GitlabUserDto[];
   };
+
+  readonly draft?: {
+    previous: boolean;
+    current: boolean;
+  };
 }
