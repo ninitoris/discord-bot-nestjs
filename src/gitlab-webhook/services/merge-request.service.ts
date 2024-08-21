@@ -193,171 +193,192 @@ export class MergeRequestService {
     return;
   }
 
+  private async handleReviewerChanged(
+    objectAttributes: MergeRequestAttributesDto,
+    changes: MergeRequestChangesDto,
+    gitlabUser: GitlabUserDto,
+  ): Promise<boolean | void> {
+    const newReviewer: GitlabUserDto = changes.reviewers.current[0];
+    const newReviewerId = newReviewer.id;
+    let approvalsInfo: IApprovalsInfo;
+    try {
+      approvalsInfo = await this.gitlabApiService.getMergeRequestApprovalsInfo(
+        objectAttributes.target_project_id,
+        objectAttributes.iid,
+      );
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+
+    const checkNewReviewer = this.gitlabUtils.getReviewerWhoDidNotApprove(
+      [newReviewerId],
+      approvalsInfo,
+    );
+
+    // проверить, что этот ревьюер еще не аппрувнул
+    if (checkNewReviewer) {
+      const tag = this.gitlabUserService.getDiscordTagsByUserIds(
+        [checkNewReviewer],
+        this.utils.isNowWorkingHours(),
+      );
+
+      const user = this.gitlabUserService.getUserById(gitlabUser.id);
+
+      const embedTitle = `${user.irlName} изменил${user.female ? 'а' : ''} ревьюера`;
+
+      let embedDescription = `Новый ревьюер: ${tag}\n`;
+      embedDescription +=
+        this.gitlabUtils.addMergeRequestInfo(objectAttributes);
+      embedDescription +=
+        this.gitlabUtils.addMergeRequestDescription(objectAttributes);
+
+      embedDescription += this.gitlabUtils.addDefaultFooter({
+        repo: objectAttributes.target.name,
+      });
+
+      const notification: DiscordNotificationType = {
+        notificationTitle: `МР! ${tag}`,
+        embedTitle,
+        embedDescription,
+        embedUrl: objectAttributes.url,
+        ...this.gitlabUtils.defaultNotificationTemplate,
+      };
+      this.discordNotificationService.sendNotification(notification);
+      return true;
+    }
+  }
+
+  private async handleAssigneeChanged(
+    objectAttributes: MergeRequestAttributesDto,
+    changes: MergeRequestChangesDto,
+    gitlabUser: GitlabUserDto,
+  ) {
+    const newAssignee: GitlabUserDto = changes.assignees.current[0];
+    const newAssigneeId = newAssignee.id;
+    const user = this.gitlabUserService.getUserById(gitlabUser.id);
+
+    const tag = this.gitlabUserService.getDiscordTagsByUserIds(
+      [newAssigneeId],
+      this.utils.isNowWorkingHours(),
+    );
+
+    const embedTitle = `${user.irlName} изменил${user.female ? 'а' : ''} ассайни`;
+
+    let embedDescription = `Новый ассайни: ${tag}\n`;
+    embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
+    embedDescription +=
+      this.gitlabUtils.addMergeRequestDescription(objectAttributes);
+
+    embedDescription += this.gitlabUtils.addDefaultFooter({
+      repo: objectAttributes.target.name,
+    });
+
+    const notification: DiscordNotificationType = {
+      notificationTitle: `МР! ${tag}`,
+      embedTitle,
+      embedDescription,
+      embedUrl: objectAttributes.url,
+      ...this.gitlabUtils.defaultNotificationTemplate,
+    };
+    return this.discordNotificationService.sendNotification(notification);
+  }
+
+  private async handleDraftChange(
+    objectAttributes: MergeRequestAttributesDto,
+    changes: MergeRequestChangesDto,
+    gitlabUser: GitlabUserDto,
+  ) {
+    if (changes.draft.current !== false) return;
+
+    // draft.current === false -> marked mr as ready
+    const assignee = objectAttributes.assignee_id;
+    let approvalsInfo: IApprovalsInfo;
+
+    try {
+      approvalsInfo = await this.gitlabApiService.getMergeRequestApprovalsInfo(
+        objectAttributes.target_project_id,
+        objectAttributes.iid,
+      );
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+    const nextReviewer = this.gitlabUtils.getReviewerWhoDidNotApprove(
+      objectAttributes.reviewer_ids,
+      approvalsInfo,
+    );
+
+    if (!nextReviewer && !assignee) {
+      return;
+    }
+
+    const tag = this.gitlabUserService.getDiscordTagsByUserIds(
+      [nextReviewer || assignee],
+      this.utils.isNowWorkingHours(),
+    );
+
+    const user = this.gitlabUserService.getUserById(gitlabUser.id);
+    const embedTitle = `${user.irlName} пометил${user.female ? 'а' : ''} МР как готовый`;
+
+    let embedDescription = '';
+    if (nextReviewer) {
+      embedDescription += `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`;
+    } else {
+      `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`;
+    }
+    embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
+    embedDescription +=
+      this.gitlabUtils.addMergeRequestDescription(objectAttributes);
+
+    embedDescription += this.gitlabUtils.addDefaultFooter({
+      repo: objectAttributes.target.name,
+    });
+
+    const notification: DiscordNotificationType = {
+      notificationTitle: `МР! ${tag}`,
+      embedTitle,
+      embedDescription,
+      embedUrl: objectAttributes.url,
+      ...this.gitlabUtils.defaultNotificationTemplate,
+    };
+
+    return this.discordNotificationService.sendNotification(notification);
+  }
+
   async handleMergeRequestUpdated(
     objectAttributes: MergeRequestAttributesDto,
     changes: MergeRequestChangesDto,
     gitlabUser: GitlabUserDto,
   ) {
-    // изменен ревьюер
     const isDraft = objectAttributes.draft;
-    if (changes.reviewers && changes.reviewers.current.length) {
-      if (isDraft) {
-        return;
-      }
-
-      const newReviewer: GitlabUserDto = changes.reviewers.current[0];
-      const newReviewerId = newReviewer.id;
-      let approvalsInfo: IApprovalsInfo;
-      try {
-        approvalsInfo =
-          await this.gitlabApiService.getMergeRequestApprovalsInfo(
-            objectAttributes.target_project_id,
-            objectAttributes.iid,
-          );
-      } catch (error) {
-        console.log(error);
-        return;
-      }
-
-      const checkNewReviewer = this.gitlabUtils.getReviewerWhoDidNotApprove(
-        [newReviewerId],
-        approvalsInfo,
-      );
-
-      // проверить, что этот ревьюер еще не аппрувнул
-      if (checkNewReviewer) {
-        const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-          [checkNewReviewer],
-          this.utils.isNowWorkingHours(),
-        );
-
-        const user = this.gitlabUserService.getUserById(gitlabUser.id);
-
-        const embedTitle = `${user.irlName} изменил${user.female ? 'а' : ''} ревьюера`;
-
-        let embedDescription = `Новый ревьюер: ${tag}\n`;
-        embedDescription +=
-          this.gitlabUtils.addMergeRequestInfo(objectAttributes);
-        embedDescription +=
-          this.gitlabUtils.addMergeRequestDescription(objectAttributes);
-
-        embedDescription += this.gitlabUtils.addDefaultFooter({
-          repo: objectAttributes.target.name,
-          lastUpdateTime: objectAttributes.updated_at,
-        });
-
-        const notification: DiscordNotificationType = {
-          notificationTitle: `МР! ${tag}`,
-          embedTitle,
-          embedDescription,
-          embedUrl: objectAttributes.url,
-          ...this.gitlabUtils.defaultNotificationTemplate,
-        };
-        return this.discordNotificationService.sendNotification(notification);
-      }
-      // если новый ревьюер уже апрувнул, то идем дальше
-    }
-    // изменен ассайни
-    if (changes.assignees && changes.assignees.current.length) {
-      if (isDraft) {
-        return;
-      }
-
-      const newAssignee: GitlabUserDto = changes.assignees.current[0];
-      const newAssigneeId = newAssignee.id;
-      const user = this.gitlabUserService.getUserById(gitlabUser.id);
-
-      const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-        [newAssigneeId],
-        this.utils.isNowWorkingHours(),
-      );
-
-      const embedTitle = `${user.irlName} изменил${user.female ? 'а' : ''} ассайни`;
-
-      let embedDescription = `Новый ассайни: ${tag}\n`;
-      embedDescription +=
-        this.gitlabUtils.addMergeRequestInfo(objectAttributes);
-      embedDescription +=
-        this.gitlabUtils.addMergeRequestDescription(objectAttributes);
-
-      embedDescription += this.gitlabUtils.addDefaultFooter({
-        repo: objectAttributes.target.name,
-        lastUpdateTime: objectAttributes.updated_at,
-      });
-
-      const notification: DiscordNotificationType = {
-        notificationTitle: `МР! ${tag}`,
-        embedTitle,
-        embedDescription,
-        embedUrl: objectAttributes.url,
-        ...this.gitlabUtils.defaultNotificationTemplate,
-      };
-      return this.discordNotificationService.sendNotification(notification);
-    }
-    // либо пометили мр как draft либо как ready
-    if (changes.draft) {
-      if (changes.draft.current !== false) return;
-
-      // draft.current === false -> marked mr as ready
-      const assignee = objectAttributes.assignee_id;
-      let approvalsInfo: IApprovalsInfo;
-
-      try {
-        approvalsInfo =
-          await this.gitlabApiService.getMergeRequestApprovalsInfo(
-            objectAttributes.target_project_id,
-            objectAttributes.iid,
-          );
-      } catch (error) {
-        console.log(error);
-        return;
-      }
-      const nextReviewer = this.gitlabUtils.getReviewerWhoDidNotApprove(
-        objectAttributes.reviewer_ids,
-        approvalsInfo,
-      );
-
-      if (!nextReviewer && !assignee) {
-        return;
-      }
-
-      const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-        [nextReviewer || assignee],
-        this.utils.isNowWorkingHours(),
-      );
-
-      const user = this.gitlabUserService.getUserById(gitlabUser.id);
-      const embedTitle = `${user.irlName} пометил${user.female ? 'а' : ''} МР как готовый`;
-
-      let embedDescription = '';
-      if (nextReviewer) {
-        embedDescription += `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`;
-      } else {
-        `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`;
-      }
-      embedDescription +=
-        this.gitlabUtils.addMergeRequestInfo(objectAttributes);
-      embedDescription +=
-        this.gitlabUtils.addMergeRequestDescription(objectAttributes);
-
-      embedDescription += this.gitlabUtils.addDefaultFooter({
-        repo: objectAttributes.target.name,
-      });
-
-      const notification: DiscordNotificationType = {
-        notificationTitle: `МР! ${tag}`,
-        embedTitle,
-        embedDescription,
-        embedUrl: objectAttributes.url,
-        ...this.gitlabUtils.defaultNotificationTemplate,
-      };
-
-      this.discordNotificationService.sendNotification(notification);
+    if (isDraft) {
       return;
     }
+
+    // изменен ревьюер
+    if (changes.reviewers && changes.reviewers.current.length) {
+      const notificationSent = this.handleReviewerChanged(
+        objectAttributes,
+        changes,
+        gitlabUser,
+      );
+      // если новый ревьюер еще не апрувнул, то отправили ему уведомление и выходим из функции
+      if (notificationSent) return;
+      // если новый ревьюер уже апрувнул, то идем дальше
+    }
+
+    // изменен ассайни
+    if (changes.assignees && changes.assignees.current.length) {
+      return this.handleAssigneeChanged(objectAttributes, changes, gitlabUser);
+    }
+
+    // пометили мр либо как draft либо как ready
+    if (changes.draft) {
+      return this.handleDraftChange(objectAttributes, changes, gitlabUser);
+    }
+
     // других обработок нет
     return;
   }
-
-  // private async handleReviewerChanged(){}
 }

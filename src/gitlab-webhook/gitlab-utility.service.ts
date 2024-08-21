@@ -13,7 +13,7 @@ export class GitlabUtilityService {
 
   public readonly gitlabColor = 0xfc6d26;
   public readonly gitlabLogo =
-    'https://static-00.iconduck.com/assets.00/gitlab-icon-2048x1885-1o0cwkbx.png';
+    'https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/144_Gitlab_logo_logos-512.png';
   public readonly gitlabBotName = 'GitLab';
   public readonly defaultNotificationTemplate = {
     embedColor: this.gitlabColor,
