@@ -1,19 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { WebhookType } from './gitlab-webhook.types';
 import { MergeRequestService } from './services/merge-request.service';
+import { PipelineService } from '@src/gitlab-webhook/services/pipeline.service';
 
 @Injectable()
 export class GitlabWebhookService {
-  constructor(private readonly mergeRequestServive: MergeRequestService) {}
+  constructor(
+    private readonly mergeRequestService: MergeRequestService,
+    private readonly pipelineService: PipelineService,
+  ) {}
 
   handleGitlabRequest(body: any): void {
     const type: WebhookType = body.object_kind;
     switch (type) {
       case 'merge_request': {
-        this.mergeRequestServive.handleMergeRequest(body);
+        this.mergeRequestService.handleMergeRequest(body);
         break;
       }
       case 'pipeline': {
+        this.pipelineService.handlePipeline(body);
         break;
       }
       case 'note': {

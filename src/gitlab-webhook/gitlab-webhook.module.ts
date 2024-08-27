@@ -8,6 +8,7 @@ import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service
 import { GitLabUserService } from './services/gitlab-user.service';
 import { DiscordNotificationModule } from '@src/discord-notification/discord-notification.module';
 import { UtilsModule } from '@src/utils/utils.module';
+import { PipelineService } from '@src/gitlab-webhook/services/pipeline.service';
 
 /* 
 Модуль отвечает за обработку всех входящих вебхуков.
@@ -19,6 +20,7 @@ import { UtilsModule } from '@src/utils/utils.module';
   providers: [
     GitlabWebhookService,
     MergeRequestService,
+    PipelineService,
     GitlabUtilityService,
     GitLabUserService,
   ],

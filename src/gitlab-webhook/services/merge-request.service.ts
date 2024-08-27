@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MergeRequestAttributesDto } from '../dto/mergeRequestAttributes.dto';
-import { MergeRequestDto } from '../dto/mergeRequest.dto';
+import { MergeRequestWebhookBodyDto } from '../dto/mergeRequestWebhookBody.dto';
 import { GitLabApiService } from '@src/gitlab-api/gitlab-api.service';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import {
@@ -24,7 +24,7 @@ export class MergeRequestService {
   ) {}
 
   // TODO: Validation pipe
-  handleMergeRequest(body: MergeRequestDto): void {
+  handleMergeRequest(body: MergeRequestWebhookBodyDto): void {
     console.log('handling mr');
     const objectAttributes: MergeRequestAttributesDto = body.object_attributes;
     const user: GitlabUserDto = body.user;
