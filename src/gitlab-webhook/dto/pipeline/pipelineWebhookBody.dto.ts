@@ -1,7 +1,8 @@
-import { CiJobDto } from '@src/gitlab-webhook/dto/ciJob.dto';
+import { CiJobDto } from '@src/gitlab-webhook/dto/pipeline/ciJob.dto';
 import { GitlabUserDto } from '@src/gitlab-webhook/dto/gitlabUser.dto';
-import { pipelineAttributesDto } from '@src/gitlab-webhook/dto/pipelineAttributes.dto';
+
 import { WebhookType } from '@src/gitlab-webhook/gitlab-webhook.types';
+import { pipelineAttributesDto } from '@src/gitlab-webhook/dto/pipeline/pipelineAttributes.dto';
 
 export class PipelineWebhookBodyDto {
   readonly object_kind: WebhookType;

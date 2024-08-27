@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GitLabApiService } from '@src/gitlab-api/gitlab-api.service';
-import { MergeRequestAttributesDto } from '@src/gitlab-webhook/dto/mergeRequestAttributes.dto';
+import { MergeRequestAttributesDto } from '@src/gitlab-webhook/dto/mergeRequest/mergeRequestAttributes.dto';
 import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
 import { UtilsService } from '@src/utils/utils.service';
 

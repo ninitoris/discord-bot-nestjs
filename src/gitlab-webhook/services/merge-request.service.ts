@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { MergeRequestAttributesDto } from '../dto/mergeRequestAttributes.dto';
-import { MergeRequestWebhookBodyDto } from '../dto/mergeRequestWebhookBody.dto';
+import { MergeRequestAttributesDto } from '../dto/mergeRequest/mergeRequestAttributes.dto';
+import { MergeRequestWebhookBodyDto } from '../dto/mergeRequest/mergeRequestWebhookBody.dto';
 import { GitLabApiService } from '@src/gitlab-api/gitlab-api.service';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import {
@@ -11,7 +11,7 @@ import { UtilsService } from '@src/utils/utils.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
 import { GitlabUserDto } from '@src/gitlab-webhook/dto/gitlabUser.dto';
-import { MergeRequestChangesDto } from '@src/gitlab-webhook/dto/mergeRequestChanges.dto';
+import { MergeRequestChangesDto } from '@src/gitlab-webhook/dto/mergeRequest/mergeRequestChanges.dto';
 
 @Injectable()
 export class MergeRequestService {
