@@ -1,0 +1,41 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  CONTAINER_NAME: 'discordbot'
+  PORT: 8445
+
+build image:
+  image: $CI_DOCKER_IMAGE
+  stage: build
+  tags:
+    - build
+  interruptible: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - when: never
+  before_script:
+    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - cp ${PROD_ENV} .env
+    - cat .env
+    - docker build . -t $CI_REGISTRY_IMAGE
+    - docker push $CI_REGISTRY_IMAGE
+
+deploy:
+  stage: deploy
+  needs:
+    - build image
+  tags: 
+    - deploy
+  interruptible: false
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - when: never
+  script:
+    - docker stop $CONTAINER_NAME || echo Contaiter not up
+    - docker rm $CONTAINER_NAME || echo Contaiter not found
+    - docker run --name $CONTAINER_NAME -d --restart always -p $PORT:8444 $CI_REGISTRY_IMAGE
