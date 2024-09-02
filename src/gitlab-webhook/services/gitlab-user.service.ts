@@ -150,6 +150,40 @@ export class GitLabUserService {
     irlName: 'кто-то',
   };
 
+  /** На вход принимается массив строк - username-ы пользователей гитлаба. Юзернейм может иметь @ в начале */
+  getDiscordTagsByUserNames(
+    usernames: Array<string>,
+    /** Высылать ли уведомления. Если true, то возвращает строку, которая будет тэгать пользователей в сообщении. Если false, то возвращает только имена пользователей, чтобы было понятно, кому адресовано сообщение, но уведомления не будет */
+    notify: boolean = true,
+  ): string | null {
+    if (!usernames.length) return null;
+    const tags: Array<string> = usernames.map((username) => {
+      let cleanedUserName = username;
+      if (username.at(0) === '@') {
+        cleanedUserName = username.slice(1);
+      }
+      const tag = this.getDiscordTagByUserName(cleanedUserName, notify);
+      if (tag) return tag;
+    });
+    return tags.join(' ');
+  }
+
+  /** На вход принимается строка - username пользователя гитлаба */
+  private getDiscordTagByUserName(
+    username: string,
+    notify: boolean = true,
+  ): string | undefined {
+    if (notify) {
+      const discordId = this.usersMap[username]?.discordId;
+      if (!discordId) return undefined;
+      return `<@${discordId}>`;
+    } else {
+      const name = this.usersMap[username]?.irlName;
+      if (!name) return;
+      return `@${name}`;
+    }
+  }
+
   getDiscordTagsByUserIds(
     /** Массив id-шников пользователей гитлаба */
     userIds: Array<number>,

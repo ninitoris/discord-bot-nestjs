@@ -159,6 +159,7 @@ export class GitlabUtilityService {
     return footer;
   }
 
+  /** Возвращает строку вида "!123: название МРа" с сылкой на сам МР */
   public addMergeRequestInfo(objectAttributes: MergeRequestAttributesDto) {
     return `[!${objectAttributes.iid}: ${objectAttributes.title}](${objectAttributes.url})\n`;
   }

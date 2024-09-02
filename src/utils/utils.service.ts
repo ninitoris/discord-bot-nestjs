@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UtilsService {
+  /** Возвращает true с понедельника по пятницу с 9 до 19 часов */
   isNowWorkingHours(): boolean {
     const date = new Date();
     const hour = date.getHours();

@@ -55,7 +55,8 @@ export class DiscordNotificationService {
 
     const result = await this.webhookClient.send(notification);
 
-    console.log('result:');
-    console.log(result);
+    // console.log('result:');
+    // console.log(result);
+    return result;
   }
 }
