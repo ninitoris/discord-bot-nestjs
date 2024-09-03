@@ -38,4 +38,4 @@ deploy:
   script:
     - docker stop $CONTAINER_NAME || echo Contaiter not up
     - docker rm $CONTAINER_NAME || echo Contaiter not found
-    - docker run --name $CONTAINER_NAME -d --restart always -p $PORT:8444 $CI_REGISTRY_IMAGE
+    - docker run --name $CONTAINER_NAME -d --restart always -p $PORT:8444 -e GITLAB_TOKEN=$GITLAB_TOKEN -e DISCORD_WEBHOOK=$DISCORD_WEBHOOK $CI_REGISTRY_IMAGE

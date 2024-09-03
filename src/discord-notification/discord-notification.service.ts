@@ -27,7 +27,7 @@ export type DiscordNotificationType = {
 @Injectable()
 export class DiscordNotificationService {
   private readonly webhookClient = new WebhookClient({
-    url: process.env.WEBHOOK,
+    url: process.env.DISCORD_WEBHOOK,
   });
 
   async sendNotification({
