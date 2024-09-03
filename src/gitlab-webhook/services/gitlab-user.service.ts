@@ -141,6 +141,11 @@ export class GitLabUserService {
       discordId: '419122050230386689',
       irlName: 'Александр Герасимов',
     },
+    AGaynulin: {
+      gitlabId: 307,
+      discordId: '244757401259999233',
+      irlName: 'Артём Гайнулин',
+    },
   };
 
   private readonly dummyUser: UserType = {
