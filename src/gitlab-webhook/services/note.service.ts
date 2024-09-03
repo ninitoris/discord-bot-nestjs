@@ -39,7 +39,7 @@ export class NoteService {
 
     if (!tags) {
       tags = this.gitlabUserService.getDiscordTagsByUserIds(
-        [gitlabUser.id],
+        [mergeRequest.author_id],
         this.utils.isNowWorkingHours(),
       );
     }
