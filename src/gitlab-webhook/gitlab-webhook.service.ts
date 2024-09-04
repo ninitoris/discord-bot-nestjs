@@ -3,12 +3,21 @@ import { WebhookType } from './gitlab-webhook.types';
 import { MergeRequestService } from './services/merge-request.service';
 import { PipelineService } from '@src/gitlab-webhook/services/pipeline.service';
 import { NoteService } from '@src/gitlab-webhook/services/note.service';
+import {
+  DiscordNotificationService,
+  DiscordNotificationType,
+} from '@src/discord-notification/discord-notification.service';
+import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
+import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 
 @Injectable()
 export class GitlabWebhookService {
   constructor(
     private readonly mergeRequestService: MergeRequestService,
     private readonly pipelineService: PipelineService,
+    private readonly discordNotificationService: DiscordNotificationService,
+    private readonly gitlabUserService: GitLabUserService,
+    private readonly gitlabUtils: GitlabUtilityService,
     private readonly noteService: NoteService,
   ) {}
 
@@ -37,5 +46,31 @@ export class GitlabWebhookService {
         throw new Error('Unknown webhook type: ' + unknownType);
       }
     }
+  }
+
+  async sendStageDeployNotification(body: any) {
+    /** Пользователь, кто запустил пайплайн */
+    const gitLabUserId = Number(body.userId);
+
+    const tag = this.gitlabUserService.getDiscordTagsByUserIds([gitLabUserId]);
+    const host = body.host;
+    const port = body.port;
+
+    const embedTitle = 'Произошел деплой';
+    let embedDescription = `На https://${host}:${port} \n`;
+
+    embedDescription += this.gitlabUtils.addDefaultFooter({
+      repo: body.repo,
+    });
+
+    const notification: DiscordNotificationType = {
+      notificationTitle: `GOL! ${tag}`,
+      embedTitle,
+      embedDescription,
+      ...this.gitlabUtils.defaultNotificationTemplate,
+    };
+
+    this.discordNotificationService.sendNotification(notification);
+    return;
   }
 }

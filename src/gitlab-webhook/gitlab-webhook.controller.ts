@@ -11,4 +11,10 @@ export class GitlabWebhookController {
     const body = req.body;
     this.gitlabService.handleGitlabRequest(body);
   }
+
+  @Post('deploy')
+  apiHandler(@Req() req: Request) {
+    const body = req.body;
+    this.gitlabService.sendStageDeployNotification(body);
+  }
 }
