@@ -13,6 +13,7 @@ RUN npm run build
 FROM registry.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/node:22.3.0
 
 WORKDIR /usr/local/discord-bot/
+ENV TZ=Europe/Moscow
 
 COPY package*.json .
 

@@ -200,7 +200,7 @@ export class GitLabUserService {
         if (notify) {
           return `<@${this.gitlabUsersMap.get(userId).discordId.toString()}>`;
         } else return `@${this.gitlabUsersMap.get(userId).irlName}`;
-      } else return userId.toString();
+      } else return userId.toString(); // TODO: получить имя пользователя из гитлаба
     });
 
     return tagsArray.join(' ');
