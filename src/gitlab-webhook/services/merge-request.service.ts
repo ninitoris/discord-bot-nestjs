@@ -118,7 +118,7 @@ export class MergeRequestService {
     if (nextReviewer) {
       embedDescription += `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`;
     } else {
-      `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`;
+      embedDescription += `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`;
     }
     embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
     embedDescription +=
