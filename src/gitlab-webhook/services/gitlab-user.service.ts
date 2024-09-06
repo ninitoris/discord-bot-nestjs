@@ -146,6 +146,74 @@ export class GitLabUserService {
       discordId: '244757401259999233',
       irlName: 'Артём Гайнулин',
     },
+    /**
+     * CLICK USERS
+     */
+    kiselev: {
+      gitlabId: 170,
+      discordId: '1070013193595928656',
+      irlName: 'Дмитрий Киселев',
+    },
+    malinin: {
+      gitlabId: 199,
+      discordId: '160462087938768896',
+      irlName: 'Малинин Андрей',
+    },
+    uskov: {
+      gitlabId: 251,
+      discordId: '1252891329466204194',
+      irlName: 'Усков Иван',
+    },
+    dsavchenko: {
+      gitlabId: 241,
+      discordId: '297753937371594752',
+      irlName: 'Денис Савченко',
+    },
+    pospelova: {
+      gitlabId: 189,
+      discordId: '1204727201451347989',
+      irlName: 'Людмила Поспелова',
+    },
+    safonov: {
+      gitlabId: 227,
+      discordId: '393104471002972170',
+      irlName: 'Иван Сафонов',
+    },
+    papin: {
+      gitlabId: 218,
+      discordId: '711598511023587328',
+      irlName: 'Семён Папин',
+    },
+    ihasanov:  {
+      gitlabId: 228,
+      discordId: '1231884490805350452',
+      irlName: 'Игорь Хасанов',
+    },
+    anazarenko: {
+      gitlabId: 191,
+      discordId: '645689994224205856',
+      irlName: 'Антон Назаренко',
+    },
+    nikolaev: {
+      gitlabId: 177,
+      discordId: '711844639463964762',
+      irlName: 'Pavel Nikolaev',
+    },
+    sotonkin: {
+      gitlabId: 176,
+      discordId: '1188807860579209247',
+      irlName: 'Евгений Сотонкин',
+    },
+    askoromnyuk: {
+      gitlabId: 198,
+      discordId: '735064930503360542',
+      irlName: 'Александр Скоромнюк',
+    },
+    aglinov: {
+      gitlabId: 235,
+      discordId: '1161903426343555094',
+      irlName: 'Александр Глинов',
+    },
   };
 
   private readonly dummyUser: UserType = {
