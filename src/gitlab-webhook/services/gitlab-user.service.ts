@@ -146,6 +146,11 @@ export class GitLabUserService {
       discordId: '244757401259999233',
       irlName: 'Артём Гайнулин',
     },
+    ISlobodyan: {
+      gitlabId: 314,
+      discordId: '1283345047286190155',
+      irlName: 'Илья Слободян',
+    },
     /**
      * CLICK USERS
      */
@@ -184,7 +189,7 @@ export class GitLabUserService {
       discordId: '711598511023587328',
       irlName: 'Семён Папин',
     },
-    ihasanov:  {
+    ihasanov: {
       gitlabId: 228,
       discordId: '1231884490805350452',
       irlName: 'Игорь Хасанов',
