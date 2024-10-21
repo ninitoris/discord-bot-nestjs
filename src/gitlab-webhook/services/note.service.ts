@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DiscordNotificationService,
-  DiscordNotificationType,
-} from '@src/discord-notification/discord-notification.service';
 import { NoteWebhookBodyDto } from '@src/gitlab-webhook/dto/note/noteWebhookBody.dto';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
+import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
+import { NotificationService } from '@src/notification-service/notification-service';
 import { UtilsService } from '@src/utils/utils.service';
 
 @Injectable()
@@ -13,7 +11,7 @@ export class NoteService {
   constructor(
     private readonly gitlabUtils: GitlabUtilityService,
     private readonly gitlabUserService: GitLabUserService,
-    private readonly discordNotificationService: DiscordNotificationService,
+    private readonly notificationService: NotificationService,
     private readonly utils: UtilsService,
   ) {}
 
@@ -60,12 +58,12 @@ export class NoteService {
 
     const notification: DiscordNotificationType = {
       notificationTitle: `МР! ${tags}`,
-      embedTitle,
-      embedDescription,
-      embedUrl: objectAttributes.url,
+      notificationSubject: embedTitle,
+      notificationDescription: embedDescription,
+      notificationUrl: objectAttributes.url,
       ...this.gitlabUtils.defaultNotificationTemplate,
     };
-    this.discordNotificationService.sendNotification(notification);
+    this.notificationService.sendNotification(notification);
     return;
   }
 

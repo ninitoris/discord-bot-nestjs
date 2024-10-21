@@ -3,22 +3,20 @@ import { MergeRequestAttributesDto } from '../dto/mergeRequest/mergeRequestAttri
 import { MergeRequestWebhookBodyDto } from '../dto/mergeRequest/mergeRequestWebhookBody.dto';
 import { GitLabApiService } from '@src/gitlab-api/gitlab-api.service';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
-import {
-  DiscordNotificationService,
-  DiscordNotificationType,
-} from '@src/discord-notification/discord-notification.service';
 import { UtilsService } from '@src/utils/utils.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
 import { GitlabUserDto } from '@src/gitlab-webhook/dto/gitlabUser.dto';
 import { MergeRequestChangesDto } from '@src/gitlab-webhook/dto/mergeRequest/mergeRequestChanges.dto';
+import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
+import { NotificationService } from '@src/notification-service/notification-service';
 
 @Injectable()
 export class MergeRequestService {
   constructor(
     private readonly gitlabApiService: GitLabApiService,
     private readonly gitlabUtils: GitlabUtilityService,
-    private readonly discordNotificationService: DiscordNotificationService,
+    private readonly notificationService: NotificationService,
     private readonly utils: UtilsService,
     private readonly gitlabUserService: GitLabUserService,
   ) {}
@@ -130,13 +128,13 @@ export class MergeRequestService {
 
     const notification: DiscordNotificationType = {
       notificationTitle: `МР! ${tag}`,
-      embedTitle,
-      embedDescription,
-      embedUrl: objectAttributes.url,
+      notificationSubject: embedTitle,
+      notificationDescription: embedDescription,
+      notificationUrl: objectAttributes.url,
       ...this.gitlabUtils.defaultNotificationTemplate,
     };
 
-    this.discordNotificationService.sendNotification(notification);
+    this.notificationService.sendNotification(notification);
     return;
   }
 
@@ -184,12 +182,12 @@ export class MergeRequestService {
 
     const notification: DiscordNotificationType = {
       notificationTitle: `МР! ${tag}`,
-      embedTitle,
-      embedDescription,
-      embedUrl: objectAttributes.url,
+      notificationSubject: embedTitle,
+      notificationDescription: embedDescription,
+      notificationUrl: objectAttributes.url,
       ...this.gitlabUtils.defaultNotificationTemplate,
     };
-    this.discordNotificationService.sendNotification(notification);
+    this.notificationService.sendNotification(notification);
     return;
   }
 
@@ -239,12 +237,12 @@ export class MergeRequestService {
 
       const notification: DiscordNotificationType = {
         notificationTitle: `МР! ${tag}`,
-        embedTitle,
-        embedDescription,
-        embedUrl: objectAttributes.url,
+        notificationSubject: embedTitle,
+        notificationDescription: embedDescription,
+        notificationUrl: objectAttributes.url,
         ...this.gitlabUtils.defaultNotificationTemplate,
       };
-      this.discordNotificationService.sendNotification(notification);
+      this.notificationService.sendNotification(notification);
       return true;
     }
   }
@@ -276,12 +274,12 @@ export class MergeRequestService {
 
     const notification: DiscordNotificationType = {
       notificationTitle: `МР! ${tag}`,
-      embedTitle,
-      embedDescription,
-      embedUrl: objectAttributes.url,
+      notificationSubject: embedTitle,
+      notificationDescription: embedDescription,
+      notificationUrl: objectAttributes.url,
       ...this.gitlabUtils.defaultNotificationTemplate,
     };
-    return this.discordNotificationService.sendNotification(notification);
+    return this.notificationService.sendNotification(notification);
   }
 
   private async handleDraftChange(
@@ -337,13 +335,13 @@ export class MergeRequestService {
 
     const notification: DiscordNotificationType = {
       notificationTitle: `МР! ${tag}`,
-      embedTitle,
-      embedDescription,
-      embedUrl: objectAttributes.url,
+      notificationSubject: embedTitle,
+      notificationDescription: embedDescription,
+      notificationUrl: objectAttributes.url,
       ...this.gitlabUtils.defaultNotificationTemplate,
     };
 
-    return this.discordNotificationService.sendNotification(notification);
+    return this.notificationService.sendNotification(notification);
   }
 
   async handleMergeRequestUpdated(
