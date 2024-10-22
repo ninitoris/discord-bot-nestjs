@@ -3,19 +3,17 @@ import { WebhookType } from './gitlab-webhook.types';
 import { MergeRequestService } from './services/merge-request.service';
 import { PipelineService } from '@src/gitlab-webhook/services/pipeline.service';
 import { NoteService } from '@src/gitlab-webhook/services/note.service';
-import {
-  DiscordNotificationService,
-  DiscordNotificationType,
-} from '@src/discord-notification/discord-notification.service';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
+import { NotificationService } from '@src/notification-service/notification-service';
+import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
 
 @Injectable()
 export class GitlabWebhookService {
   constructor(
     private readonly mergeRequestService: MergeRequestService,
     private readonly pipelineService: PipelineService,
-    private readonly discordNotificationService: DiscordNotificationService,
+    private readonly notificationService: NotificationService,
     private readonly gitlabUserService: GitLabUserService,
     private readonly gitlabUtils: GitlabUtilityService,
     private readonly noteService: NoteService,
@@ -65,12 +63,12 @@ export class GitlabWebhookService {
 
     const notification: DiscordNotificationType = {
       notificationTitle: `GOL! ${tag}`,
-      embedTitle,
-      embedDescription,
+      notificationSubject: embedTitle,
+      notificationDescription: embedDescription,
       ...this.gitlabUtils.defaultNotificationTemplate,
     };
 
-    this.discordNotificationService.sendNotification(notification);
+    this.notificationService.sendNotification(notification);
     return;
   }
 }
