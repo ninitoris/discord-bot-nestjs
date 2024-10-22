@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DiscordNotificationService,
-  DiscordNotificationType,
-} from '@src/discord-notification/discord-notification.service';
 import { CiJobDto } from '@src/gitlab-webhook/dto/pipeline/ciJob.dto';
 import { PipelineWebhookBodyDto } from '@src/gitlab-webhook/dto/pipeline/pipelineWebhookBody.dto';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
+import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
+import { NotificationService } from '@src/notification-service/notification-service';
 import { UtilsService } from '@src/utils/utils.service';
 
 @Injectable()
 export class PipelineService {
   constructor(
-    private readonly discordNotificationService: DiscordNotificationService,
+    private readonly notificationService: NotificationService,
     private readonly gitlabUtils: GitlabUtilityService,
     private readonly utils: UtilsService,
     private readonly gitlabUserService: GitLabUserService,
@@ -50,13 +48,13 @@ export class PipelineService {
 
     const notification: DiscordNotificationType = {
       notificationTitle: `CI/CD! ${tag}`,
-      embedTitle,
-      embedDescription,
-      embedUrl: objectAttributes.url,
+      notificationSubject: embedTitle,
+      notificationDescription: embedDescription,
+      notificationUrl: objectAttributes.url,
       ...this.gitlabUtils.defaultNotificationTemplate,
     };
 
-    this.discordNotificationService.sendNotification(notification);
+    this.notificationService.sendNotification(notification);
     return;
   }
 
