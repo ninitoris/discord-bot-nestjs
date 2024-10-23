@@ -14,6 +14,9 @@ export interface GeneralNotificationType {
 
   /** Ссылка, которая будет прикреплена к уведомлению */
   notificationUrl?: string;
+
+  /** Массив ID-шников пользователей гитлаба, которые получат уведомление в сообщении */
+  notifyUsersIDs: Array<number>;
 }
 
 export interface NotificationStrategy {

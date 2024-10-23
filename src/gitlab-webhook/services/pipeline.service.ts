@@ -3,8 +3,8 @@ import { CiJobDto } from '@src/gitlab-webhook/dto/pipeline/ciJob.dto';
 import { PipelineWebhookBodyDto } from '@src/gitlab-webhook/dto/pipeline/pipelineWebhookBody.dto';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
-import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
 import { NotificationService } from '@src/notification-service/notification-service';
+import { GeneralNotificationType } from '@src/notification-service/notification-strategy';
 import { UtilsService } from '@src/utils/utils.service';
 
 @Injectable()
@@ -28,11 +28,6 @@ export class PipelineService {
     const failedStage = failedJob.stage;
     const failedJobName = failedJob.name;
 
-    const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-      [gitlabUser.id],
-      this.utils.isNowWorkingHours(),
-    );
-
     const embedTitle = 'Упал пайплайн';
     let embedDescription = `На стейдже ${failedStage}\n`;
     embedDescription += `На джобе ${failedJobName}\n`;
@@ -46,12 +41,12 @@ export class PipelineService {
       repo: body.project.name,
     });
 
-    const notification: DiscordNotificationType = {
-      notificationTitle: `CI/CD! ${tag}`,
+    const notification: GeneralNotificationType = {
+      notificationTitle: `CI/CD!`,
       notificationSubject: embedTitle,
       notificationDescription: embedDescription,
       notificationUrl: objectAttributes.url,
-      ...this.gitlabUtils.defaultNotificationTemplate,
+      notifyUsersIDs: [gitlabUser.id],
     };
 
     this.notificationService.sendNotification(notification);

@@ -6,7 +6,7 @@ import { NoteService } from '@src/gitlab-webhook/services/note.service';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { NotificationService } from '@src/notification-service/notification-service';
-import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
+import { GeneralNotificationType } from '@src/notification-service/notification-strategy';
 
 @Injectable()
 export class GitlabWebhookService {
@@ -50,7 +50,6 @@ export class GitlabWebhookService {
     /** Пользователь, кто запустил пайплайн */
     const gitLabUserId = Number(body.userId);
 
-    const tag = this.gitlabUserService.getDiscordTagsByUserIds([gitLabUserId]);
     const host = body.host;
     const port = body.port;
 
@@ -61,11 +60,11 @@ export class GitlabWebhookService {
       repo: body.repo,
     });
 
-    const notification: DiscordNotificationType = {
-      notificationTitle: `GOL! ${tag}`,
+    const notification: GeneralNotificationType = {
+      notificationTitle: `GOL!`,
       notificationSubject: embedTitle,
       notificationDescription: embedDescription,
-      ...this.gitlabUtils.defaultNotificationTemplate,
+      notifyUsersIDs: [gitLabUserId],
     };
 
     this.notificationService.sendNotification(notification);

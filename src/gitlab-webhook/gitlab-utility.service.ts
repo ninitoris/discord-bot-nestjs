@@ -11,16 +11,6 @@ export class GitlabUtilityService {
     private readonly utils: UtilsService,
   ) {}
 
-  public readonly gitlabColor = 0xfc6d26;
-  public readonly gitlabLogo =
-    'https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/144_Gitlab_logo_logos-512.png';
-  public readonly gitlabBotName = 'GitLab';
-  public readonly defaultNotificationTemplate = {
-    embedColor: this.gitlabColor,
-    avatarURL: this.gitlabLogo,
-    username: this.gitlabBotName,
-  };
-
   /** Возвращает человека, от которого требуется следующее действие в МРе.
    * Если ревьюер еще не апрувнул, то это будет он.
    * Если ревьюера нет или он уже апрувнул, то это будет ассайни.
@@ -81,7 +71,7 @@ export class GitlabUtilityService {
 
     let reviewer = null;
     if (this.isApprovalsInfo(approvalsInfo)) {
-      console.log('it IS approvals info');
+      // console.log('it IS approvals info');
       if (approvalsInfo?.approved) {
         // если кто-то апрувнул МР, то ищем ревьюера, который еще не апрувнул его
         const approvedByIds = approvalsInfo.approved_by.map((user) => {

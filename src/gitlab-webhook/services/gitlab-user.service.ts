@@ -228,6 +228,30 @@ export class GitLabUserService {
     irlName: 'кто-то',
   };
 
+  /** На вход принимается массив строк - username-ы пользователей гитлаба. Юзернейм может иметь @ в начале.
+   * Возвращает массив id-шников этих пользователей гитлаба
+   */
+  getGitlabUserIDsByUserNames(
+    usernames: Array<string>,
+  ): Array<number | undefined> {
+    if (!usernames.length) return [];
+    const tags: Array<number | undefined> = usernames.map((username) => {
+      const tag = this.getGitlabUserIdByUserName(username);
+      if (tag) return tag;
+    });
+    return tags;
+  }
+
+  /** Возвращает id пользователя gitlab по его юзернейму */
+  getGitlabUserIdByUserName(username: string): number | null {
+    let cleanedUserName = username;
+    if (username.at(0) === '@') {
+      cleanedUserName = username.slice(1);
+    }
+
+    return this.usersMap[cleanedUserName]?.gitlabId || null;
+  }
+
   /** На вход принимается массив строк - username-ы пользователей гитлаба. Юзернейм может иметь @ в начале */
   getDiscordTagsByUserNames(
     usernames: Array<string>,
@@ -260,23 +284,6 @@ export class GitLabUserService {
       if (!name) return;
       return `@${name}`;
     }
-  }
-
-  getDiscordTagsByUserIds(
-    /** Массив id-шников пользователей гитлаба */
-    userIds: Array<number>,
-    /** Высылать ли уведомления. Если true, то возвращает строку, которая будет тэгать пользователей в сообщении. Если false, то возвращает только имена пользователей, чтобы было понятно, кому адресовано сообщение, но уведомления не будет */
-    notify: boolean = true,
-  ): string {
-    const tagsArray: Array<string> = userIds.map((userId) => {
-      if (this.gitlabUsersMap.has(userId)) {
-        if (notify) {
-          return `<@${this.gitlabUsersMap.get(userId).discordId.toString()}>`;
-        } else return `@${this.gitlabUsersMap.get(userId).irlName}`;
-      } else return userId.toString(); // TODO: получить имя пользователя из гитлаба
-    });
-
-    return tagsArray.join(' ');
   }
 
   /** Возвращает либо имя пользователя по его ID, либо заглушку "Кто-то" */

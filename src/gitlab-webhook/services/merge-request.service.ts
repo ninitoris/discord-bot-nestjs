@@ -8,8 +8,8 @@ import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.serv
 import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
 import { GitlabUserDto } from '@src/gitlab-webhook/dto/gitlabUser.dto';
 import { MergeRequestChangesDto } from '@src/gitlab-webhook/dto/mergeRequest/mergeRequestChanges.dto';
-import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
 import { NotificationService } from '@src/notification-service/notification-service';
+import { GeneralNotificationType } from '@src/notification-service/notification-strategy';
 
 @Injectable()
 export class MergeRequestService {
@@ -23,7 +23,7 @@ export class MergeRequestService {
 
   // TODO: Validation pipe
   handleMergeRequest(body: MergeRequestWebhookBodyDto): void {
-    console.log('handling mr');
+    // console.log('handling mr');
     const objectAttributes: MergeRequestAttributesDto = body.object_attributes;
     const user: GitlabUserDto = body.user;
     const action = objectAttributes.action;
@@ -61,7 +61,7 @@ export class MergeRequestService {
   async handleMergeRequestOpened(
     objectAttributes: MergeRequestAttributesDto,
   ): Promise<void> {
-    console.log('handle opening mr');
+    // console.log('handle opening mr');
 
     // при открытии МРа он может быть draft
     const isDraft = objectAttributes.draft;
@@ -103,11 +103,6 @@ export class MergeRequestService {
       return;
     }
 
-    const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-      [nextReviewer || assignee],
-      this.utils.isNowWorkingHours(),
-    );
-
     const authorId = objectAttributes.author_id;
     const user = this.gitlabUserService.getUserById(authorId);
     const embedTitle = `${user.irlName} открыл${user.female ? 'а' : ''} МР`;
@@ -126,12 +121,12 @@ export class MergeRequestService {
       repo: objectAttributes.target.name,
     });
 
-    const notification: DiscordNotificationType = {
-      notificationTitle: `МР! ${tag}`,
+    const notification: GeneralNotificationType = {
+      notificationTitle: `МР!`,
       notificationSubject: embedTitle,
       notificationDescription: embedDescription,
       notificationUrl: objectAttributes.url,
-      ...this.gitlabUtils.defaultNotificationTemplate,
+      notifyUsersIDs: [nextReviewer || assignee],
     };
 
     this.notificationService.sendNotification(notification);
@@ -161,16 +156,13 @@ export class MergeRequestService {
 
     if (!nextReviewer) return;
 
-    const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-      [nextReviewer],
-      this.utils.isNowWorkingHours(),
-    );
-
     const user = this.gitlabUserService.getUserById(gitlabUser.id);
+    const nextReviewerUserName =
+      this.gitlabUserService.getUserNameById(nextReviewer);
     const embedTitle = `${user.irlName} апрувнул${user.female ? 'а' : ''} МР`;
 
     // опять же делаем поправку на бесплатный гитлаб. в платном мог бы быть еще один ревьюер, но тут далее идет только ассайни
-    let embedDescription = `Асайни: ${tag}\n`;
+    let embedDescription = `Асайни: ${nextReviewerUserName}\n`;
     embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
     embedDescription +=
       this.gitlabUtils.addMergeRequestDescription(objectAttributes);
@@ -180,12 +172,12 @@ export class MergeRequestService {
       lastUpdateTime: objectAttributes.updated_at,
     });
 
-    const notification: DiscordNotificationType = {
-      notificationTitle: `МР! ${tag}`,
+    const notification: GeneralNotificationType = {
+      notificationTitle: `МР!`,
       notificationSubject: embedTitle,
       notificationDescription: embedDescription,
       notificationUrl: objectAttributes.url,
-      ...this.gitlabUtils.defaultNotificationTemplate,
+      notifyUsersIDs: [nextReviewer],
     };
     this.notificationService.sendNotification(notification);
     return;
@@ -216,16 +208,13 @@ export class MergeRequestService {
 
     // проверить, что этот ревьюер еще не аппрувнул
     if (checkNewReviewer) {
-      const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-        [checkNewReviewer],
-        this.utils.isNowWorkingHours(),
-      );
-
       const user = this.gitlabUserService.getUserById(gitlabUser.id);
+      const newReviewerUserName =
+        this.gitlabUserService.getUserNameById(checkNewReviewer);
 
       const embedTitle = `${user.irlName} изменил${user.female ? 'а' : ''} ревьюера`;
 
-      let embedDescription = `Новый ревьюер: ${tag}\n`;
+      let embedDescription = `Новый ревьюер: ${newReviewerUserName}\n`;
       embedDescription +=
         this.gitlabUtils.addMergeRequestInfo(objectAttributes);
       embedDescription +=
@@ -235,12 +224,12 @@ export class MergeRequestService {
         repo: objectAttributes.target.name,
       });
 
-      const notification: DiscordNotificationType = {
-        notificationTitle: `МР! ${tag}`,
+      const notification: GeneralNotificationType = {
+        notificationTitle: `МР!`,
         notificationSubject: embedTitle,
         notificationDescription: embedDescription,
         notificationUrl: objectAttributes.url,
-        ...this.gitlabUtils.defaultNotificationTemplate,
+        notifyUsersIDs: [checkNewReviewer],
       };
       this.notificationService.sendNotification(notification);
       return true;
@@ -256,14 +245,12 @@ export class MergeRequestService {
     const newAssigneeId = newAssignee.id;
     const user = this.gitlabUserService.getUserById(gitlabUser.id);
 
-    const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-      [newAssigneeId],
-      this.utils.isNowWorkingHours(),
-    );
+    const newAssigneeUserName =
+      this.gitlabUserService.getUserNameById(newAssigneeId);
 
     const embedTitle = `${user.irlName} изменил${user.female ? 'а' : ''} ассайни`;
 
-    let embedDescription = `Новый ассайни: ${tag}\n`;
+    let embedDescription = `Новый ассайни: ${newAssigneeUserName}\n`;
     embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
     embedDescription +=
       this.gitlabUtils.addMergeRequestDescription(objectAttributes);
@@ -272,12 +259,12 @@ export class MergeRequestService {
       repo: objectAttributes.target.name,
     });
 
-    const notification: DiscordNotificationType = {
-      notificationTitle: `МР! ${tag}`,
+    const notification: GeneralNotificationType = {
+      notificationTitle: `МР!`,
       notificationSubject: embedTitle,
       notificationDescription: embedDescription,
       notificationUrl: objectAttributes.url,
-      ...this.gitlabUtils.defaultNotificationTemplate,
+      notifyUsersIDs: [newAssigneeId],
     };
     return this.notificationService.sendNotification(notification);
   }
@@ -311,11 +298,6 @@ export class MergeRequestService {
       return;
     }
 
-    const tag = this.gitlabUserService.getDiscordTagsByUserIds(
-      [nextReviewer || assignee],
-      this.utils.isNowWorkingHours(),
-    );
-
     const user = this.gitlabUserService.getUserById(gitlabUser.id);
     const embedTitle = `${user.irlName} пометил${user.female ? 'а' : ''} МР как готовый`;
 
@@ -333,12 +315,12 @@ export class MergeRequestService {
       repo: objectAttributes.target.name,
     });
 
-    const notification: DiscordNotificationType = {
-      notificationTitle: `МР! ${tag}`,
+    const notification: GeneralNotificationType = {
+      notificationTitle: `МР!`,
       notificationSubject: embedTitle,
       notificationDescription: embedDescription,
       notificationUrl: objectAttributes.url,
-      ...this.gitlabUtils.defaultNotificationTemplate,
+      notifyUsersIDs: [nextReviewer || assignee],
     };
 
     return this.notificationService.sendNotification(notification);
