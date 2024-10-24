@@ -12,7 +12,8 @@ type UserType = {
 
   female?: boolean;
 
-  telegramID?: string;
+  telegramID?: number;
+  telegramUsername?: string;
 };
 
 @Injectable()
@@ -31,7 +32,8 @@ export class GitLabUserService {
       gitlabId: 102,
       discordId: '366279169614807040',
       irlName: 'Станислав Сиротинин',
-      telegramID: '@ninitoris',
+      telegramUsername: 'ninitoris',
+      telegramID: 451810887,
     },
     DOrehov: {
       gitlabId: 113,

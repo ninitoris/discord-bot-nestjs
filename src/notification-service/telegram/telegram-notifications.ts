@@ -30,31 +30,71 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
       notificationUrl,
     } = options;
 
-    const tags: string = this.getTelegramTagsByUserIDs(notifyUsersIDs);
+    const { tags, usersTelegramIDs } =
+      this.getTelegramTagsByUserIDs(notifyUsersIDs);
 
-    let messageBody = '';
-    messageBody += `**${this.utils.escapeMarkdown(notificationTitle)} ${tags}**\n`;
-    messageBody += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
-    messageBody += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
+    let messageBodyWithTags = '';
+    messageBodyWithTags += `**${this.utils.escapeMarkdown(notificationTitle)} ${tags}**\n`;
+    messageBodyWithTags += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
+    messageBodyWithTags += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
 
-    this.bot.sendMessageToGroupChat(this.chatId, messageBody, {
+    this.bot.sendMessageToGroupChat(this.chatId, messageBodyWithTags, {
       parse_mode: 'MarkdownV2',
+      disable_notification: true,
+      link_preview_options: {
+        is_disabled: true, // выключил превью ссылок, потому что ссылки на gitlab.interprocom.ru у нас выглядят не очень красиво
+      },
     });
-  }
 
-  private getTelegramTagsByUserIDs(notifyUsersIDs: Array<number>): string {
-    const tags: Array<string> = [];
-    for (const userId of notifyUsersIDs) {
-      const tgID = this.getTelegramTagOrNameByUserID(userId);
-      if (tgID) tags.push(tgID);
+    if (usersTelegramIDs.length) {
+      let messageBodyNoTags = '';
+      messageBodyNoTags += `**${this.utils.escapeMarkdown(notificationTitle)}**\n`;
+      messageBodyNoTags += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
+      messageBodyNoTags += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
+
+      for (const usersTelegramID of usersTelegramIDs) {
+        this.bot.sendMessageToGroupChat(usersTelegramID, messageBodyNoTags, {
+          parse_mode: 'MarkdownV2',
+          disable_notification: true,
+          link_preview_options: {
+            is_disabled: true,
+          },
+        });
+      }
     }
-    return tags.join(' ');
   }
 
-  private getTelegramTagOrNameByUserID(userId: number): string | undefined {
+  private getTelegramTagsByUserIDs(notifyUsersIDs: Array<number>): {
+    tags: string;
+    usersTelegramIDs: Array<number>;
+  } {
+    const tags: Array<string> = [];
+    const usersTelegramIDs: Array<number> = [];
+    for (const userId of notifyUsersIDs) {
+      const { tag, usersTelegramID } =
+        this.getTelegramNameAndIdByUserId(userId);
+      if (tag) tags.push(tag);
+      if (usersTelegramID) usersTelegramIDs.push(usersTelegramID);
+    }
+    return {
+      tags: tags.join(' '),
+      usersTelegramIDs: usersTelegramIDs,
+    };
+  }
+
+  private getTelegramNameAndIdByUserId(userId: number): {
+    tag?: string;
+    usersTelegramID?: number;
+  } {
     const user = this.gitLabUserService.getUserById(userId);
     if (!user) return;
 
-    return user.telegramID || user.irlName;
+    const tag = '@' + user.telegramUsername || user.irlName;
+    const usersTelegramID = user.telegramID;
+
+    return {
+      tag,
+      usersTelegramID,
+    };
   }
 }
