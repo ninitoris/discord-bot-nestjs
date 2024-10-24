@@ -116,4 +116,35 @@ export class UtilsService {
 
     return time + ' ' + date;
   }
+
+  private readonly MARKDOWN_SPECIAL_CHARS = [
+    '\\',
+    '_',
+    '*',
+    '[',
+    ']',
+    '(',
+    ')',
+    '~',
+    '`',
+    '>',
+    '<',
+    '&',
+    '#',
+    '+',
+    '-',
+    '=',
+    '|',
+    '{',
+    '}',
+    '.',
+    '!',
+  ];
+
+  public escapeMarkdown = (text: string) => {
+    this.MARKDOWN_SPECIAL_CHARS.forEach(
+      (char) => (text = text.replaceAll(char, `\\${char}`)),
+    );
+    return text;
+  };
 }

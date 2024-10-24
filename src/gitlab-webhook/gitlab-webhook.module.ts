@@ -12,13 +12,14 @@ import { NoteService } from '@src/gitlab-webhook/services/note.service';
 import { NotificationService } from '@src/notification-service/notification-service';
 import { DiscordNotificationStrategy } from '@src/notification-service/discord/discord-notifications';
 import { TelegramNotificationStrategy } from '@src/notification-service/telegram/telegram-notifications';
+import { TelegramBotModule } from '@src/telegram-bot/telegram-bot.module';
 
 /* 
 Модуль отвечает за обработку всех входящих вебхуков.
 При необходимости формирует уведомление и отдает его в discord notification модуль
 */
 @Module({
-  imports: [GitLabApiMobule, UtilsModule],
+  imports: [GitLabApiMobule, UtilsModule, TelegramBotModule],
   controllers: [GitlabWebhookController],
   providers: [
     GitlabWebhookService,

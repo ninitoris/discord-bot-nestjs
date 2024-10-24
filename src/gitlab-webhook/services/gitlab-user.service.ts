@@ -6,11 +6,13 @@ type UserType = {
   /** ID пользоателя в гитлабе */
   gitlabId: number;
   /** ID пользователя в дискорде */
-  discordId: string;
+  discordId?: string;
   /** Имя Фамилия в жизни */
   irlName: string;
 
   female?: boolean;
+
+  telegramID?: string;
 };
 
 @Injectable()
@@ -29,6 +31,7 @@ export class GitLabUserService {
       gitlabId: 102,
       discordId: '366279169614807040',
       irlName: 'Станислав Сиротинин',
+      telegramID: '@ninitoris',
     },
     DOrehov: {
       gitlabId: 113,
@@ -252,39 +255,39 @@ export class GitLabUserService {
     return this.usersMap[cleanedUserName]?.gitlabId || null;
   }
 
-  /** На вход принимается массив строк - username-ы пользователей гитлаба. Юзернейм может иметь @ в начале */
-  getDiscordTagsByUserNames(
-    usernames: Array<string>,
-    /** Высылать ли уведомления. Если true, то возвращает строку, которая будет тэгать пользователей в сообщении. Если false, то возвращает только имена пользователей, чтобы было понятно, кому адресовано сообщение, но уведомления не будет */
-    notify: boolean = true,
-  ): string | null {
-    if (!usernames.length) return null;
-    const tags: Array<string> = usernames.map((username) => {
-      let cleanedUserName = username;
-      if (username.at(0) === '@') {
-        cleanedUserName = username.slice(1);
-      }
-      const tag = this.getDiscordTagByUserName(cleanedUserName, notify);
-      if (tag) return tag;
-    });
-    return tags.join(' ');
-  }
+  // /** На вход принимается массив строк - username-ы пользователей гитлаба. Юзернейм может иметь @ в начале */
+  // getDiscordTagsByUserNames(
+  //   usernames: Array<string>,
+  //   /** Высылать ли уведомления. Если true, то возвращает строку, которая будет тэгать пользователей в сообщении. Если false, то возвращает только имена пользователей, чтобы было понятно, кому адресовано сообщение, но уведомления не будет */
+  //   notify: boolean = true,
+  // ): string | null {
+  //   if (!usernames.length) return null;
+  //   const tags: Array<string> = usernames.map((username) => {
+  //     let cleanedUserName = username;
+  //     if (username.at(0) === '@') {
+  //       cleanedUserName = username.slice(1);
+  //     }
+  //     const tag = this.getDiscordTagByUserName(cleanedUserName, notify);
+  //     if (tag) return tag;
+  //   });
+  //   return tags.join(' ');
+  // }
 
-  /** На вход принимается строка - username пользователя гитлаба */
-  private getDiscordTagByUserName(
-    username: string,
-    notify: boolean = true,
-  ): string | undefined {
-    if (notify) {
-      const discordId = this.usersMap[username]?.discordId;
-      if (!discordId) return undefined;
-      return `<@${discordId}>`;
-    } else {
-      const name = this.usersMap[username]?.irlName;
-      if (!name) return;
-      return `@${name}`;
-    }
-  }
+  // /** На вход принимается строка - username пользователя гитлаба */
+  // private getDiscordTagByUserName(
+  //   username: string,
+  //   notify: boolean = true,
+  // ): string | undefined {
+  //   if (notify) {
+  //     const discordId = this.usersMap[username]?.discordId;
+  //     if (!discordId) return undefined;
+  //     return `<@${discordId}>`;
+  //   } else {
+  //     const name = this.usersMap[username]?.irlName;
+  //     if (!name) return;
+  //     return `@${name}`;
+  //   }
+  // }
 
   /** Возвращает либо имя пользователя по его ID, либо заглушку "Кто-то" */
   getUserNameById(userId: number): string | 'Кто-то' {

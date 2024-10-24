@@ -1,30 +1,60 @@
 import { Injectable } from '@nestjs/common';
-import { GeneralNotificationType } from '@src/notification-service/notification-strategy';
-import * as TelegramBot from 'node-telegram-bot-api';
+import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
+import {
+  GeneralNotificationType,
+  NotificationStrategy,
+} from '@src/notification-service/notification-strategy';
+import { TelegramBotService } from '@src/telegram-bot/telegram-bot.service';
+import { UtilsService } from '@src/utils/utils.service';
 
 interface TelegramMessageType extends GeneralNotificationType {}
 
 @Injectable()
-export class TelegramNotificationStrategy {
-  private readonly token = process.env.TELEGRAM_TOKEN;
+export class TelegramNotificationStrategy implements NotificationStrategy {
   private readonly chatId = process.env.TELEGRAM_CHAT_ID;
-  private readonly bot = new TelegramBot(this.token, { polling: true });
 
-  sendNotification() {}
+  constructor(
+    private readonly bot: TelegramBotService,
+    private readonly gitLabUserService: GitLabUserService,
+    private readonly utils: UtilsService,
+  ) {}
 
-  public sendMsgInGroupChat(options: TelegramMessageType) {
+  async sendNotification(options: TelegramMessageType) {
     console.log(options);
 
-    const { notificationTitle, notificationDescription } = options;
+    const {
+      notificationTitle,
+      notificationSubject,
+      notificationDescription,
+      notifyUsersIDs,
+      notificationUrl,
+    } = options;
+
+    const tags: string = this.getTelegramTagsByUserIDs(notifyUsersIDs);
 
     let messageBody = '';
-    messageBody += `<b>${notificationTitle}</b>\n`;
-    messageBody += `${notificationDescription}`;
+    messageBody += `**${this.utils.escapeMarkdown(notificationTitle)} ${tags}**\n`;
+    messageBody += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
+    messageBody += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
 
-    this.bot.sendMessage(this.chatId, messageBody, {
-      parse_mode: 'HTML',
-      disable_web_page_preview: true,
-      disable_notification: false,
+    this.bot.sendMessageToGroupChat(this.chatId, messageBody, {
+      parse_mode: 'MarkdownV2',
     });
+  }
+
+  private getTelegramTagsByUserIDs(notifyUsersIDs: Array<number>): string {
+    const tags: Array<string> = [];
+    for (const userId of notifyUsersIDs) {
+      const tgID = this.getTelegramTagOrNameByUserID(userId);
+      if (tgID) tags.push(tgID);
+    }
+    return tags.join(' ');
+  }
+
+  private getTelegramTagOrNameByUserID(userId: number): string | undefined {
+    const user = this.gitLabUserService.getUserById(userId);
+    if (!user) return;
+
+    return user.telegramID || user.irlName;
   }
 }
