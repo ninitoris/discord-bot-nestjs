@@ -15,7 +15,8 @@ export class NotificationService {
     private readonly telegramNotificationStrategy: TelegramNotificationStrategy,
   ) {
     //TODO
-    this.strategies.push(discordNotificationStrategy);
+    // this.strategies.push(discordNotificationStrategy);
+    this.strategies.push(telegramNotificationStrategy as any);
   }
 
   sendNotification(options: GeneralNotificationType) {

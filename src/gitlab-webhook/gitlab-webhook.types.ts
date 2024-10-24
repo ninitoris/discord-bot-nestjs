@@ -7,6 +7,16 @@ export interface IApprovalsInfo {
   approved_by: Array<{ user: GitlabUserDto }>;
 }
 
+export type UserInfo = {
+  id: number;
+  username: string;
+  name: string;
+  state: string;
+  locked: boolean;
+  avatar_url: string;
+  web_url: string;
+};
+
 /*
 type ProjectType = {
   id: number;

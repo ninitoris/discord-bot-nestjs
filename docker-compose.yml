@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16
+    container_name: gitlab_notifications
+    restart: always
+    environment:
+      POSTGRES_USER: axadmin
+      POSTGRES_PASSWORD: ebethohlov2022
+      POSTGRES_DB: gitlab_notifications
+    ports:
+      - "1488:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local

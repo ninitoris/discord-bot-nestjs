@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
+import { Injectable, Logger } from '@nestjs/common';
+import {
+  IApprovalsInfo,
+  type UserInfo,
+} from '@src/gitlab-webhook/gitlab-webhook.types';
 import axios, { AxiosInstance } from 'axios';
 
 @Injectable()
@@ -45,5 +48,17 @@ export class GitLabApiService {
           throw error;
         }
       });
+  }
+
+  async getUserInfo(username: string): Promise<UserInfo | null> {
+    try {
+      const url = `/users?username=${username}`;
+      const response = await this.axios.get(url);
+
+      if (response) return response.data;
+    } catch (error) {
+      new Logger(error);
+      return;
+    }
   }
 }
