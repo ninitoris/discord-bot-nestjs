@@ -70,4 +70,14 @@ export class GitlabWebhookService {
     this.notificationService.sendNotification(notification);
     return;
   }
+
+  async sendGolNotification() {
+    const notification: GeneralNotificationType = {
+      notificationTitle: `ГООООООООООЛ ⚽️`,
+      notificationSubject: '',
+      notificationDescription: '',
+      notifyUsersIDs: [],
+    };
+    this.notificationService.sendNotification(notification);
+  }
 }
