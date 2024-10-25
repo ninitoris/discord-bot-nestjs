@@ -4,6 +4,7 @@ import { TelegramBotService } from '@src/telegram-bot/telegram-bot.service';
 import { TelegramBotUpdate } from '@src/telegram-bot/telegram-bot.update';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { UserModule } from '../user/user.module';
+import { GitLabApiModule } from '../gitlab-api/gitlab-api.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UserModule } from '../user/user.module';
       }),
     }),
     UserModule,
+    GitLabApiModule,
   ],
   providers: [TelegramBotService, TelegramBotUpdate],
   exports: [TelegramBotService],

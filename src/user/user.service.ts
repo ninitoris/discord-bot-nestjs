@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from './user.entity';
+import { Users } from './entities/users.entity';
 import { Repository } from 'typeorm';
 import { GitLabApiService } from '../gitlab-api/gitlab-api.service';
 
@@ -17,7 +17,7 @@ export class UserService {
     const isExist = await this.userRepository.findOne({
       where: {
         telegramID: createUserDto.telegramID,
-        name: userInfo.name,
+        name: userInfo.name.toLowerCase(),
       },
     });
 
@@ -29,10 +29,32 @@ export class UserService {
       orgID: 'IPC',
       gitlabID: userInfo.id,
       discordID: null,
-      gitlabName: String(userInfo.username),
+      gitlabName: String(userInfo.username).toLowerCase(),
       telegramID: createUserDto.telegramID,
     });
 
     return { newUser };
+  }
+
+  async findByTgID(telegramID: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        telegramID,
+      },
+    });
+    if (!user) return null;
+
+    return user;
+  }
+
+  async findByGitlabName(gitlabName: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        gitlabName,
+      },
+    });
+    if (!user) return null;
+
+    return user;
   }
 }

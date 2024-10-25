@@ -2,13 +2,19 @@ import { Logger } from '@nestjs/common';
 import { Action, Ctx, Hears, Start, Update } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { UserService } from '../user/user.service';
+import { GitLabApiService } from '../gitlab-api/gitlab-api.service';
 
 const chatId = '-1002035561069';
+// Объект который отвечает за "очередь" на регистрацию
 const userStates: Record<number, string | null> = {};
 
 @Update()
 export class TelegramBotUpdate {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly gitlabApi: GitLabApiService,
+  ) {}
+
   @Start()
   async start(@Ctx() ctx: Context) {
     if (ctx.chat.type === 'private') {
@@ -18,31 +24,54 @@ export class TelegramBotUpdate {
 
   @Hears(/https:\/\/gitlab\.interprocom\.ru\/([a-zA-Z0-9_-]+)/)
   async hears(@Ctx() ctx: Context) {
-    const userId = ctx.from?.id;
-    const userName = ctx.from?.username;
+    // по какой-то причне Context плохо типизирован, и нужно писать костыльную проверку
     if (!('text' in ctx.message)) {
       Logger.log(ctx.message);
       return;
     }
 
+    const userTgId = ctx.from?.id;
+    const userTgName = ctx.from?.username;
     const url = ctx.message.text;
+    const username = url?.match(/\/([^\/]+)$/)?.[1].toLowerCase();
 
-    if (userStates[userId]) {
+    if (userStates[userTgId]) {
       await ctx.reply('Вы уже отправили логин на проверку.');
       return;
     }
 
-    if (userId && !userStates[userId]) {
-      userStates[userId] = url; // Сохраняем текст сообщения, а не объект
+    // Проверка на то, добавен ли gitlab аккаунт
+    // const gitlbabUser = await this.userService.findByGitlabName(username);
+    // if (gitlbabUser) {
+    //   await ctx.reply('Данный пользователь уже добавлен.');
+    //   return;
+    // }
 
-      const messageToGroup = `Новый пользователь хочет зарегистрироваться:\n👤 <a href="tg://user?id=${userId}">${userName ? `@${userName}` : 'Пользователь'}</a>\n🦊 ${url}\n`;
+    // Проверка на то, добавлял ли данный тг пользователь gitlab аккаунт
+    // const tgUser = await this.userService.findByTgID(userTgId);
+    // if (tgUser) {
+    //   await ctx.reply('Вы уже отправили логин на проверку.');
+    //   return;
+    // }
+
+    if (userTgId && !userStates[userTgId]) {
+      userStates[userTgId] = username;
+      const userInfo = await this.gitlabApi.getUserInfo(username);
+      const messageToGroup = `\nНовый пользователь хочет зарегистрироваться:
+      \n⚽️ <a href="tg://user?id=${userTgId}">${userTgName ? `@${userTgName}` : 'Пользователь'}</a>
+      \n🦊 ${url}
+      \n👤 ${userInfo?.name}
+      \n🦫 Мужчина
+      \n🏭 Интерпроком
+      `;
 
       await ctx.telegram.sendMessage(chatId, messageToGroup, {
         parse_mode: 'HTML',
         ...Markup.inlineKeyboard([
+          [Markup.button.callback('Редактировать', `edit_${userTgId}`)],
           [
-            Markup.button.callback('Подтвердить', `approve_${userId}`),
-            Markup.button.callback('Отказать', `reject_${userId}`),
+            Markup.button.callback('Подтвердить', `approve_${userTgId}`),
+            Markup.button.callback('Отказать', `reject_${userTgId}`),
           ],
         ]),
       });
@@ -53,19 +82,16 @@ export class TelegramBotUpdate {
 
   @Action(/approve_(\d+)/)
   async approveAction(@Ctx() ctx: Context) {
-    // по какой-то причне Context плохо типизирован, и нужно писать костыльную проверку
     if (!('match' in ctx)) {
       Logger.log('Match не найден');
       return;
     }
     const match = ctx.match as RegExpExecArray;
     const userId = Number(match[1]);
-    const url = userStates[userId];
+    const username = userStates[userId];
 
-    if (url) {
-      const username = url.match(/\/([^\/]+)$/)?.[1];
-
-      this.userService.createUser({
+    if (username) {
+      await this.userService.createUser({
         gitlabName: username,
         telegramID: userId,
       });
@@ -76,7 +102,7 @@ export class TelegramBotUpdate {
       );
 
       // Уведомление в группе
-      await ctx.editMessageText(`Пользователь был успешно подтвержден.`);
+      await ctx.sendMessage(`Пользователь был успешно подтвержден.`);
 
       delete userStates[userId];
     }
@@ -97,9 +123,30 @@ export class TelegramBotUpdate {
       // TODO можно добавить блеклист для отклоненных пользователей
 
       // Уведомление в группе
-      await ctx.editMessageText(`Регистрация пользователя была отклонена.`);
+      await ctx.sendMessage(`Регистрация пользователя была отклонена.`);
 
       delete userStates[userId];
     }
+  }
+
+  @Action(/edit_(\d+)/)
+  async editAction(@Ctx() ctx: Context) {
+    if (!('match' in ctx)) {
+      Logger.log('Match не найден');
+      return;
+    }
+
+    const match = ctx.match as RegExpExecArray;
+    const userId = Number(match[1]);
+
+    await ctx.editMessageReplyMarkup({
+      inline_keyboard: [
+        [
+          Markup.button.callback('👤 Имя', `update_name_${userId}`),
+          Markup.button.callback('🦫 Пол', `update_gender_${userId}`),
+          Markup.button.callback('🏭 Организация', `update_org_${userId}`),
+        ],
+      ],
+    });
   }
 }
