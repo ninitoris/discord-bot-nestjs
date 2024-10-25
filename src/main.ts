@@ -1,13 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import 'reflect-metadata';
-import { getBotToken } from 'nestjs-telegraf';
+import { ValidationPipe } from '@nestjs/common';
+import { AppDataSource } from './data-source';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const bot = app.get(getBotToken());
   app.setGlobalPrefix('/rest/api/3');
-  app.use(bot.webhookCallback('/secret-path'));
+  // Валидация сразу на все эндпоинты
+  app.useGlobalPipes(new ValidationPipe());
+
+  await AppDataSource.initialize();
 
   await app.listen(8444);
 }

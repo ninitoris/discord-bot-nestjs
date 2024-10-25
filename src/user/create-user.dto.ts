@@ -1,1 +1,5 @@
-export class CreateUserDto {}
+export class CreateUserDto {
+  gitlabName: string;
+
+  telegramID: number;
+}

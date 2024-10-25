@@ -12,4 +12,4 @@ import { GitLabApiService } from './gitlab-api.service';
   providers: [GitLabApiService],
   exports: [GitLabApiService],
 })
-export class GitLabApiMobule {}
+export class GitLabApiModule {}

@@ -8,6 +8,7 @@ import axios, { AxiosInstance } from 'axios';
 @Injectable()
 export class GitLabApiService {
   private axios: AxiosInstance;
+  private readonly logger = new Logger(GitLabApiService.name);
 
   constructor() {
     const token = process.env.GITLAB_TOKEN;
@@ -30,7 +31,7 @@ export class GitLabApiService {
     projectId: number,
     mergeRequestId: number,
   ): Promise<IApprovalsInfo | null> {
-    const url = `/${projectId}/merge_requests/${mergeRequestId}/approvals`;
+    const url = `/projects/${projectId}/merge_requests/${mergeRequestId}/approvals`;
     // console.log('querying: ' + process.env.GITLAB_API_URL + url);
     return this.axios
       .get(url)
@@ -50,15 +51,21 @@ export class GitLabApiService {
       });
   }
 
+  // Запрос на получение информации о пользователе в гитлабе по его username из url
   async getUserInfo(username: string): Promise<UserInfo | null> {
     try {
-      const url = `/users?username=${username}`;
-      const response = await this.axios.get(url);
+      const response = await this.axios.get(`/users?username=${username}`);
 
-      if (response) return response.data;
+      if (response && Array.isArray(response.data) && response.data.length > 0)
+        return response.data[0];
+      return null;
     } catch (error) {
-      new Logger(error);
-      return;
+      this.logger.error(
+        `Error fetching user info for username: ${username}`,
+        error.stack,
+      );
+
+      return null;
     }
   }
 }

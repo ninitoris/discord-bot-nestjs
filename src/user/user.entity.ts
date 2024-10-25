@@ -12,10 +12,10 @@ export class Users {
   id: number;
 
   @Column()
-  name?: string;
+  name: string;
 
-  @Column()
-  female: boolean;
+  @Column({ default: false })
+  female: boolean | null;
 
   @Column()
   orgID: string;
@@ -24,7 +24,10 @@ export class Users {
   gitlabID: number;
 
   @Column()
-  discordID: string;
+  gitlabName: string;
+
+  @Column({ nullable: true })
+  discordID: string | null;
 
   @Column()
   telegramID: number;

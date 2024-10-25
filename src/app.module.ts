@@ -5,7 +5,7 @@ import { GitlabWebhookModule } from './gitlab-webhook/gitlab-webhook.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
-import { TelegrafModule } from 'nestjs-telegraf';
+import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
 
 @Module({
   imports: [
@@ -25,22 +25,12 @@ import { TelegrafModule } from 'nestjs-telegraf';
         database: configService.get('DB_NAME'),
         synchronize: true,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        migrations: [__dirname + '/migrations/*{.ts,.js}'],
       }),
       inject: [ConfigService],
     }),
     UserModule,
-    TelegrafModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        token: configService.get('TELEGRAM_TOKEN'),
-        launchOptions: {
-          webhook: {
-            domain: 'domain.tld',
-            path: '/secret-path',
-          },
-        },
-      }),
-    }),
+    TelegramBotModule,
   ],
   controllers: [AppController],
   providers: [AppService],

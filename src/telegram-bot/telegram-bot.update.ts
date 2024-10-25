@@ -1,13 +1,14 @@
-import { Markup, type Context } from 'telegraf';
-import type { GeneralNotificationType } from '../notification-strategy';
-import axios from 'axios';
+import { Logger } from '@nestjs/common';
 import { Action, Ctx, Hears, Start, Update } from 'nestjs-telegraf';
+import { Context, Markup } from 'telegraf';
+import { UserService } from '../user/user.service';
 
 const chatId = '-1002035561069';
 const userStates: Record<number, string | null> = {};
 
 @Update()
-export class AppUpdate {
+export class TelegramBotUpdate {
+  constructor(private readonly userService: UserService) {}
   @Start()
   async start(@Ctx() ctx: Context) {
     if (ctx.chat.type === 'private') {
@@ -19,8 +20,12 @@ export class AppUpdate {
   async hears(@Ctx() ctx: Context) {
     const userId = ctx.from?.id;
     const userName = ctx.from?.username;
-    // const url = ctx.message?.text;
-    const url = 'ctx.message'; // Используем текст сообщения
+    if (!('text' in ctx.message)) {
+      Logger.log(ctx.message);
+      return;
+    }
+
+    const url = ctx.message.text;
 
     if (userStates[userId]) {
       await ctx.reply('Вы уже отправили логин на проверку.');
@@ -48,12 +53,22 @@ export class AppUpdate {
 
   @Action(/approve_(\d+)/)
   async approveAction(@Ctx() ctx: Context) {
-    const userId = 1;
-    // const userId = Number(ctx.match[1]);
-    const userLogin = userStates[userId];
+    // по какой-то причне Context плохо типизирован, и нужно писать костыльную проверку
+    if (!('match' in ctx)) {
+      Logger.log('Match не найден');
+      return;
+    }
+    const match = ctx.match as RegExpExecArray;
+    const userId = Number(match[1]);
+    const url = userStates[userId];
 
-    if (userLogin) {
-      axios.get('name');
+    if (url) {
+      const username = url.match(/\/([^\/]+)$/)?.[1];
+
+      this.userService.createUser({
+        gitlabName: username,
+        telegramID: userId,
+      });
 
       await ctx.telegram.sendMessage(
         userId,
@@ -69,9 +84,12 @@ export class AppUpdate {
 
   @Action(/reject_(\d+)/)
   async rejectAction(@Ctx() ctx: Context) {
-    // Исправлен дублирующийся обработчик
-    // const userId = Number(ctx.match[1]);
-    const userId = 2;
+    if (!('match' in ctx)) {
+      Logger.log('Match не найден');
+      return;
+    }
+    const match = ctx.match as RegExpExecArray;
+    const userId = Number(match[1]);
     const userLogin = userStates[userId];
 
     if (userLogin) {
@@ -84,8 +102,4 @@ export class AppUpdate {
       delete userStates[userId];
     }
   }
-}
-
-export function sendMessage(options: GeneralNotificationType) {
-  return options;
 }
