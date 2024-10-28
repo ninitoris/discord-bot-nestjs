@@ -51,7 +51,7 @@ export class GitLabApiService {
       });
   }
 
-  // Запрос на получение информации о пользователе в гитлабе по его username из url
+  // Получение информации о пользователе в гитлабе по его username из url
   async getUserInfo(username: string): Promise<UserInfo | null> {
     try {
       const response = await this.axios.get(`/users?username=${username}`);

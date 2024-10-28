@@ -11,6 +11,7 @@ import { PipelineService } from '@src/gitlab-webhook/services/pipeline.service';
 import { NoteService } from '@src/gitlab-webhook/services/note.service';
 import { NotificationService } from '@src/notification-service/notification-service';
 import { DiscordNotificationStrategy } from '@src/notification-service/discord/discord-notifications';
+import { TelegramNotificationStrategy } from '../notification-service/telegram/telegram-notifications';
 
 /* 
 Модуль отвечает за обработку всех входящих вебхуков.
@@ -28,6 +29,7 @@ import { DiscordNotificationStrategy } from '@src/notification-service/discord/d
     GitLabUserService,
     NotificationService,
     DiscordNotificationStrategy,
+    TelegramNotificationStrategy,
   ],
 })
 export class GitlabWebhookModule {

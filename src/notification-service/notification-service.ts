@@ -4,7 +4,7 @@ import {
   GeneralNotificationType,
   NotificationStrategy,
 } from '@src/notification-service/notification-strategy';
-import { TelegramNotificationStrategy } from './telegram/telegram-notifications';
+import { TelegramNotificationStrategy } from '@src/notification-service/telegram/telegram-notifications';
 
 @Injectable()
 export class NotificationService {
