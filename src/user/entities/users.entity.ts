@@ -15,7 +15,7 @@ export class Users {
   name: string;
 
   @Column({ default: false })
-  female: boolean | null;
+  female: boolean;
 
   @Column()
   orgID: string;
