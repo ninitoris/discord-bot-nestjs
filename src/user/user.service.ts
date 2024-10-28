@@ -14,10 +14,13 @@ export class UserService {
 
   async createUser(createUserDto: CreateUserDto) {
     const userInfo = await this.gitlabApi.getUserInfo(createUserDto.gitlabName);
+    if (!userInfo) {
+      throw new BadRequestException(`${createUserDto.gitlabName} не найден`);
+    }
+
     const isExist = await this.userRepository.findOne({
       where: {
-        telegramID: createUserDto.telegramID,
-        name: userInfo.name.toLowerCase(),
+        name: userInfo?.name,
       },
     });
 
@@ -25,11 +28,11 @@ export class UserService {
       throw new BadRequestException('Пользователь уже зарегестрирован');
 
     const newUser = await this.userRepository.save({
-      name: String(userInfo.name),
+      name: String(userInfo?.name),
       orgID: 'IPC',
-      gitlabID: userInfo.id,
+      gitlabID: userInfo?.id,
       discordID: null,
-      gitlabName: String(userInfo.username).toLowerCase(),
+      gitlabName: String(userInfo?.username).toLowerCase(),
       telegramID: createUserDto.telegramID,
     });
 
