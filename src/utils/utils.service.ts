@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
+type TimeType = 'hour' | 'minute' | 'second' | 'milisecond';
+
 @Injectable()
 export class UtilsService {
   /** Возвращает true с понедельника по пятницу с 9 до 19 часов */
@@ -115,6 +117,25 @@ export class UtilsService {
       .join('.');
 
     return time + ' ' + date;
+  }
+
+  /** Если время валидное, то возвращает true. Время должно быть числом */
+  isTimeValid(time: number | unknown, timeType: TimeType): boolean {
+    if (typeof time !== 'number') return false;
+    if (time < 0) return false;
+
+    switch (timeType) {
+      case 'hour':
+        return time < 24 ? true : false;
+      case 'second':
+      case 'minute':
+        return time < 60 ? true : false;
+      case 'milisecond':
+        return time < 1000 ? true : false;
+      default:
+        const unknownTimeType: never = timeType;
+        throw new Error(`unknown time type: ${unknownTimeType}`);
+    }
   }
 
   private readonly MARKDOWN_SPECIAL_CHARS = [
