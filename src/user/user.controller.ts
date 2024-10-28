@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { CreateUserDto } from './create-user.dto';
+import { CreateUserDto, GetUserByTgDto } from './create-user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -7,8 +7,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findByID(@Body() telegramID: number) {
-    return this.userService.findByTgID(telegramID);
+  findByID(@Body() getUserDto: GetUserByTgDto) {
+    return this.userService.findByTgID(getUserDto);
   }
 
   @Post()

@@ -3,3 +3,11 @@ export class CreateUserDto {
 
   telegramID: number;
 }
+
+export class GetUserByTgDto {
+  telegramID: number;
+}
+
+export class GetUserByGlDto {
+  gitlabName: string;
+}

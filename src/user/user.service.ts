@@ -1,5 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './create-user.dto';
+import {
+  CreateUserDto,
+  GetUserByGlDto,
+  GetUserByTgDto,
+} from './create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './entities/users.entity';
 import { Repository } from 'typeorm';
@@ -39,24 +43,26 @@ export class UserService {
     return { newUser };
   }
 
-  async findByTgID(telegramID: number) {
+  async findByTgID(getUserByTgDto: GetUserByTgDto): Promise<Users | undefined> {
     const user = await this.userRepository.findOne({
       where: {
-        telegramID,
+        telegramID: getUserByTgDto.telegramID,
       },
     });
-    if (!user) return null;
+    if (!user) return undefined;
 
     return user;
   }
 
-  async findByGitlabName(gitlabName: string) {
+  async findByGitlabName(
+    getUserByGlDto: GetUserByGlDto,
+  ): Promise<Users | undefined> {
     const user = await this.userRepository.findOne({
       where: {
-        gitlabName,
+        gitlabName: getUserByGlDto.gitlabName,
       },
     });
-    if (!user) return null;
+    if (!user) return undefined;
 
     return user;
   }
