@@ -82,12 +82,7 @@ export class TelegramBotUpdate {
 
   @Action(/approve_(\d+)/)
   async approveAction(@Ctx() ctx: Context) {
-    if (!('match' in ctx)) {
-      Logger.log('Match не найден');
-      return;
-    }
-    const match = ctx.match as RegExpExecArray;
-    const userId = Number(match[1]);
+    const userId = this.getUserId(ctx);
     const username = userStates[userId];
 
     if (username) {
@@ -110,12 +105,7 @@ export class TelegramBotUpdate {
 
   @Action(/reject_(\d+)/)
   async rejectAction(@Ctx() ctx: Context) {
-    if (!('match' in ctx)) {
-      Logger.log('Match не найден');
-      return;
-    }
-    const match = ctx.match as RegExpExecArray;
-    const userId = Number(match[1]);
+    const userId = this.getUserId(ctx);
     const userLogin = userStates[userId];
 
     if (userLogin) {
@@ -131,14 +121,9 @@ export class TelegramBotUpdate {
 
   @Action(/edit_(\d+)/)
   async editAction(@Ctx() ctx: Context) {
-    if (!('match' in ctx)) {
-      Logger.log('Match не найден');
-      return;
-    }
+    const userId = this.getUserId(ctx);
 
-    const match = ctx.match as RegExpExecArray;
-    const userId = Number(match[1]);
-
+    // Обновляем кнопки для редактирования
     await ctx.editMessageReplyMarkup({
       inline_keyboard: [
         [
@@ -146,7 +131,39 @@ export class TelegramBotUpdate {
           Markup.button.callback('🦫 Пол', `update_gender_${userId}`),
           Markup.button.callback('🏭 Организация', `update_org_${userId}`),
         ],
+        [Markup.button.callback('🔙 Назад', `back_${userId}`)],
       ],
     });
+  }
+
+  // Метод для отправки начальных кнопок
+  async sendInitialButtons(ctx: Context, userId: number) {
+    await ctx.editMessageReplyMarkup({
+      inline_keyboard: [
+        [Markup.button.callback('Редактировать', `edit_${userId}`)],
+        [
+          Markup.button.callback('Подтвердить', `approve_${userId}`),
+          Markup.button.callback('Отказать', `reject_${userId}`),
+        ],
+      ],
+    });
+  }
+
+  // Обработчик кнопки "Назад"
+  @Action(/back_(\d+)/)
+  async backAction(@Ctx() ctx: Context) {
+    const userId = this.getUserId(ctx);
+
+    await this.sendInitialButtons(ctx, userId);
+  }
+
+  getUserId(ctx: Context) {
+    if (!('match' in ctx)) {
+      Logger.log('Match не найден');
+      return;
+    }
+    const match = ctx.match as RegExpExecArray;
+    const userId = Number(match[1]);
+    return userId;
   }
 }
