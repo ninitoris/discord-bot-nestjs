@@ -5,7 +5,6 @@ import { GitlabWebhookModule } from './gitlab-webhook/gitlab-webhook.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
-import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
 
 @Module({
   imports: [
@@ -30,7 +29,6 @@ import { TelegramBotModule } from './telegram-bot/telegram-bot.module';
       inject: [ConfigService],
     }),
     UserModule,
-    TelegramBotModule,
   ],
   controllers: [AppController],
   providers: [AppService],

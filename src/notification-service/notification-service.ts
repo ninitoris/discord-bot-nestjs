@@ -4,7 +4,7 @@ import {
   GeneralNotificationType,
   NotificationStrategy,
 } from '@src/notification-service/notification-strategy';
-import { TelegramNotificationStrategy } from '@src/notification-service/telegram/telegram-notifications';
+import { TelegramNotificationStrategy } from './telegram/telegram-notifications';
 
 @Injectable()
 export class NotificationService {
@@ -15,8 +15,7 @@ export class NotificationService {
     private readonly telegramNotificationStrategy: TelegramNotificationStrategy,
   ) {
     //TODO
-    // this.strategies.push(discordNotificationStrategy);
-    this.strategies.push(telegramNotificationStrategy as any);
+    this.strategies.push(discordNotificationStrategy);
   }
 
   sendNotification(options: GeneralNotificationType) {
