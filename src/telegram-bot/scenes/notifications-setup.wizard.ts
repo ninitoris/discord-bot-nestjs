@@ -12,9 +12,7 @@ import {
   WizardStep,
 } from 'nestjs-telegraf';
 import { Markup, Scenes } from 'telegraf';
-// import { Update } from 'telegraf/typings/core/types/typegram';
 import { WizardSession, WizardSessionData } from 'telegraf/typings/scenes';
-// import * as tt from 'telegraf/src/telegram-types';
 import { MessageManager } from '@src/telegram-bot/message-manager/message-manager';
 import { Update } from 'telegraf/types';
 
@@ -35,6 +33,9 @@ export interface MyWizardContext extends Scenes.WizardContext {
 }
 
 enum Steps {
+  groupChatNotify = 0,
+  privateMessageNotify = 1,
+  stepGoToTimeConfiguration = 2,
   selectTimeStep = 3,
   inputTimeStep = 4,
   confirmation = 5,
@@ -47,8 +48,8 @@ export class NotificationsSetupWizard {
     private readonly mm: MessageManager,
   ) {}
 
-  @WizardStep(0)
-  protected async step0(@Context() ctx: Scenes.WizardContext) {
+  @WizardStep(Steps.groupChatNotify)
+  protected async groupChatNotify(@Context() ctx: Scenes.WizardContext) {
     const msgText =
       'Выберите формат упоминаний вашего имени в групповом чате.\n\nУведомления будут приходить в чат в любом случае, но если вы включите упоминания в формате @username, то будете получать специальные уведомления.';
 
@@ -63,21 +64,21 @@ export class NotificationsSetupWizard {
   }
 
   @Action('enableTags')
-  protected async step123(@Context() ctx: MyWizardContext) {
+  protected async enableTagsAction(@Context() ctx: MyWizardContext) {
     ctx.session.groupChatTagsEnabled = true;
 
-    await this.step1(ctx);
+    await this.privateMessageNotify(ctx);
   }
 
   @Action('disableTags')
-  protected async disableTags(@Context() ctx: MyWizardContext) {
+  protected async disableTagsAction(@Context() ctx: MyWizardContext) {
     ctx.session.groupChatTagsEnabled = false;
 
-    await this.step1(ctx);
+    await this.privateMessageNotify(ctx);
   }
 
-  @WizardStep(1)
-  protected async step1(@Context() ctx: MyWizardContext) {
+  @WizardStep(Steps.privateMessageNotify)
+  protected async privateMessageNotify(@Context() ctx: MyWizardContext) {
     await this.mm.msg(
       ctx,
       'Дублировать уведомления в личные сообщения?\n\nЕсли включено, то все уведомления, которые должны упомянать вас, будут отправляться и в общий чат, и в этот',
@@ -94,18 +95,18 @@ export class NotificationsSetupWizard {
   protected async enableDuplicate(@Context() ctx: MyWizardContext) {
     ctx.session.personalMessageNotifications = true;
 
-    await this.step2(ctx);
+    await this.goToTimeConfiguration(ctx);
   }
 
   @Action('disableDuplicate')
   protected async disableDuplicate(@Context() ctx: MyWizardContext) {
     ctx.session.personalMessageNotifications = false;
 
-    await this.step2(ctx);
+    await this.goToTimeConfiguration(ctx);
   }
 
-  @WizardStep(2)
-  protected async step2(@Context() ctx: MyWizardContext) {
+  @WizardStep(Steps.stepGoToTimeConfiguration)
+  protected async goToTimeConfiguration(@Context() ctx: MyWizardContext) {
     const { groupChatTagsEnabled, personalMessageNotifications } = ctx.session;
 
     if (groupChatTagsEnabled || personalMessageNotifications) {

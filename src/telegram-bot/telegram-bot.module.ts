@@ -4,7 +4,6 @@ import { MessageManager } from '@src/telegram-bot/message-manager/message-manage
 import { MessageStore } from '@src/telegram-bot/message-manager/message-store';
 import { NotificationsSetupWizard } from '@src/telegram-bot/scenes/notifications-setup.wizard';
 import { TestWizard } from '@src/telegram-bot/scenes/test.wizard';
-import { TelegramBotService } from '@src/telegram-bot/telegram-bot.service';
 import { TelegramBotUpdate } from '@src/telegram-bot/telegram-bot.update';
 import { UtilsModule } from '@src/utils/utils.module';
 import { UtilsService } from '@src/utils/utils.service';
@@ -23,7 +22,6 @@ import { session } from 'telegraf';
     }),
   ],
   providers: [
-    TelegramBotService,
     TelegramBotUpdate,
     NotificationsSetupWizard,
     TestWizard,
@@ -31,6 +29,6 @@ import { session } from 'telegraf';
     MessageStore,
     MessageManager,
   ],
-  exports: [TelegramBotService],
+  exports: [],
 })
 export class TelegramBotModule {}

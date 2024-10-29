@@ -4,8 +4,9 @@ import {
   GeneralNotificationType,
   NotificationStrategy,
 } from '@src/notification-service/notification-strategy';
-import { TelegramBotService } from '@src/telegram-bot/telegram-bot.service';
 import { UtilsService } from '@src/utils/utils.service';
+import { InjectBot } from 'nestjs-telegraf';
+import { Telegraf } from 'telegraf';
 
 interface TelegramMessageType extends GeneralNotificationType {}
 
@@ -14,7 +15,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
   private readonly chatId = process.env.TELEGRAM_CHAT_ID;
 
   constructor(
-    private readonly bot: TelegramBotService,
+    @InjectBot() private readonly bot: Telegraf,
     private readonly gitLabUserService: GitLabUserService,
     private readonly utils: UtilsService,
   ) {}
@@ -38,7 +39,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     messageBodyWithTags += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
     messageBodyWithTags += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
 
-    this.bot.sendMessageToGroupChat(this.chatId, messageBodyWithTags, {
+    this.bot.telegram.sendMessage(this.chatId, messageBodyWithTags, {
       parse_mode: 'MarkdownV2',
       disable_notification: true,
       link_preview_options: {
@@ -53,7 +54,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
       messageBodyNoTags += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
 
       for (const usersTelegramID of usersTelegramIDs) {
-        this.bot.sendMessageToGroupChat(usersTelegramID, messageBodyNoTags, {
+        this.bot.telegram.sendMessage(usersTelegramID, messageBodyNoTags, {
           parse_mode: 'MarkdownV2',
           disable_notification: true,
           link_preview_options: {
