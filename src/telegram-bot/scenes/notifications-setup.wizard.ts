@@ -1,7 +1,3 @@
-import {
-  StartMenuMarkup,
-  StartMenuText,
-} from '@src/telegram-bot/telegram-bot.update';
 import { UtilsService } from '@src/utils/utils.service';
 import {
   Action,
@@ -12,25 +8,12 @@ import {
   WizardStep,
 } from 'nestjs-telegraf';
 import { Markup, Scenes } from 'telegraf';
-import { WizardSession, WizardSessionData } from 'telegraf/typings/scenes';
 import { MessageManager } from '@src/telegram-bot/message-manager/message-manager';
-import { Update } from 'telegraf/types';
-
-interface SessionData {
-  groupChatTagsEnabled?: boolean;
-  personalMessageNotifications?: boolean;
-  notificationsTime?: {
-    startHour: number;
-    startMinute: number;
-    endHour: number;
-    endMinute: number;
-  };
-}
-
-export interface MyWizardContext extends Scenes.WizardContext {
-  update: Update;
-  session: SessionData & WizardSession<WizardSessionData>;
-}
+import { CustomWizardContext } from '@src/telegram-bot/types/telegram-bot-types';
+import {
+  StartMenuMarkup,
+  StartMenuText,
+} from '@src/telegram-bot/telegram-bot.constants';
 
 enum Steps {
   groupChatNotify = 0,
@@ -64,21 +47,21 @@ export class NotificationsSetupWizard {
   }
 
   @Action('enableTags')
-  protected async enableTagsAction(@Context() ctx: MyWizardContext) {
+  protected async enableTagsAction(@Context() ctx: CustomWizardContext) {
     ctx.session.groupChatTagsEnabled = true;
 
     await this.privateMessageNotify(ctx);
   }
 
   @Action('disableTags')
-  protected async disableTagsAction(@Context() ctx: MyWizardContext) {
+  protected async disableTagsAction(@Context() ctx: CustomWizardContext) {
     ctx.session.groupChatTagsEnabled = false;
 
     await this.privateMessageNotify(ctx);
   }
 
   @WizardStep(Steps.privateMessageNotify)
-  protected async privateMessageNotify(@Context() ctx: MyWizardContext) {
+  protected async privateMessageNotify(@Context() ctx: CustomWizardContext) {
     await this.mm.msg(
       ctx,
       'Дублировать уведомления в личные сообщения?\n\nЕсли включено, то все уведомления, которые должны упомянать вас, будут отправляться и в общий чат, и в этот',
@@ -92,21 +75,21 @@ export class NotificationsSetupWizard {
   }
 
   @Action('enableDuplicate')
-  protected async enableDuplicate(@Context() ctx: MyWizardContext) {
+  protected async enableDuplicate(@Context() ctx: CustomWizardContext) {
     ctx.session.personalMessageNotifications = true;
 
     await this.goToTimeConfiguration(ctx);
   }
 
   @Action('disableDuplicate')
-  protected async disableDuplicate(@Context() ctx: MyWizardContext) {
+  protected async disableDuplicate(@Context() ctx: CustomWizardContext) {
     ctx.session.personalMessageNotifications = false;
 
     await this.goToTimeConfiguration(ctx);
   }
 
   @WizardStep(Steps.stepGoToTimeConfiguration)
-  protected async goToTimeConfiguration(@Context() ctx: MyWizardContext) {
+  protected async goToTimeConfiguration(@Context() ctx: CustomWizardContext) {
     const { groupChatTagsEnabled, personalMessageNotifications } = ctx.session;
 
     if (groupChatTagsEnabled || personalMessageNotifications) {
@@ -118,7 +101,7 @@ export class NotificationsSetupWizard {
   }
 
   @WizardStep(Steps.selectTimeStep)
-  protected async selectTimeStep(@Context() ctx: MyWizardContext) {
+  protected async selectTimeStep(@Context() ctx: CustomWizardContext) {
     const { groupChatTagsEnabled, personalMessageNotifications } = ctx.session;
     let msg = 'Выберите время, в которое вы хотите получать уведомления.\n\n';
 
@@ -148,7 +131,9 @@ export class NotificationsSetupWizard {
   }
 
   @Action('setDefaultNotificationsTime')
-  protected async setDefaultNotificationsTime(@Context() ctx: MyWizardContext) {
+  protected async setDefaultNotificationsTime(
+    @Context() ctx: CustomWizardContext,
+  ) {
     ctx.session.notificationsTime = {
       startHour: 9,
       startMinute: 0,
@@ -161,7 +146,7 @@ export class NotificationsSetupWizard {
   }
 
   @Action('inputTime')
-  protected async inputTime(@Context() ctx: MyWizardContext) {
+  protected async inputTime(@Context() ctx: CustomWizardContext) {
     await this.mm.msg(
       ctx,
       'Введите время в формате "12:34-23:59" (по умолчанию - 09:00-19:00)',
@@ -171,7 +156,7 @@ export class NotificationsSetupWizard {
   }
 
   @WizardStep(Steps.inputTimeStep)
-  protected async inputTimeStep(@Context() ctx: MyWizardContext) {
+  protected async inputTimeStep(@Context() ctx: CustomWizardContext) {
     if (!('message' in ctx.update && 'text' in ctx.update.message)) {
       // ctx.deleteMessage();
       return;
@@ -209,7 +194,7 @@ export class NotificationsSetupWizard {
   }
 
   @WizardStep(Steps.confirmation)
-  protected async confirmation(@Context() ctx: MyWizardContext) {
+  protected async confirmation(@Context() ctx: CustomWizardContext) {
     const {
       groupChatTagsEnabled,
       personalMessageNotifications,
@@ -242,7 +227,7 @@ export class NotificationsSetupWizard {
   }
 
   @Action('confirm')
-  protected async confirm(@Context() ctx: MyWizardContext) {
+  protected async confirm(@Context() ctx: CustomWizardContext) {
     // TODO: включить или выключить тэги для этого пользователя
     // TODO: включить или выключить личные уведомления в телеге для этого пользователя
     // TODO: установить время пользователя в бд типо
@@ -252,13 +237,13 @@ export class NotificationsSetupWizard {
   }
 
   @Action('cancel') // это экшен, который висит на кнопке "отмена"
-  protected async exit(@Context() ctx: MyWizardContext) {
+  protected async exit(@Context() ctx: CustomWizardContext) {
     await this.mm.msg(ctx, StartMenuText, StartMenuMarkup);
     await ctx.scene.leave();
   }
 
   @Command('exit')
-  protected async exitCommand(@Context() ctx: MyWizardContext) {
+  protected async exitCommand(@Context() ctx: CustomWizardContext) {
     await this.mm.sendNewMessage(ctx, StartMenuText, StartMenuMarkup);
     await this.mm.userSentSomething(ctx);
     await this.mm.cleanUpChat(ctx.chat.id);
@@ -266,7 +251,7 @@ export class NotificationsSetupWizard {
   }
 
   @Hears(/.*/)
-  protected async onAnyText(@Context() ctx: MyWizardContext) {
+  protected async onAnyText(@Context() ctx: CustomWizardContext) {
     if (ctx.wizard.cursor === Steps.inputTimeStep) {
       return await this.inputTimeStep(ctx);
     }

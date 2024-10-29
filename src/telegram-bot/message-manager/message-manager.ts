@@ -3,7 +3,7 @@ import { Context, Telegraf } from 'telegraf';
 import * as tg from 'telegraf/types';
 import { InjectBot } from 'nestjs-telegraf';
 import { Injectable, Logger } from '@nestjs/common';
-import { MyCoolContext } from '@src/telegram-bot/telegram-bot.update';
+import { CustomContext } from '@src/telegram-bot/types/telegram-bot-types';
 
 @Injectable()
 export class MessageManager {
@@ -111,7 +111,7 @@ export class MessageManager {
     return message;
   }
 
-  async userSentSomething(ctx: MyCoolContext) {
+  async userSentSomething(ctx: CustomContext) {
     if (
       'callback_query' in ctx.update &&
       'message' in ctx.update.callback_query

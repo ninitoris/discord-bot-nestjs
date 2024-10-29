@@ -1,6 +1,11 @@
 import { Logger } from '@nestjs/common';
 import { MessageManager } from '@src/telegram-bot/message-manager/message-manager';
 import {
+  NavigationButtons,
+  StartMenuMarkup,
+  StartMenuText,
+} from '@src/telegram-bot/telegram-bot.constants';
+import {
   Action,
   Command,
   Ctx,
@@ -9,31 +14,7 @@ import {
   Start,
   Update,
 } from 'nestjs-telegraf';
-import { Context, Markup, Scenes } from 'telegraf';
-import { Update as TelegrafUpdate } from 'telegraf/types';
-
-export enum NavigationButtons {
-  notificationsConfig = 'Настроить уведомления',
-}
-
-export const StartMenuText = 'Меню 1';
-export const StartMenuMarkup = Markup.inlineKeyboard([
-  [
-    Markup.button.callback(
-      NavigationButtons.notificationsConfig,
-      'notifications',
-    ),
-  ],
-  [
-    Markup.button.callback('Кнопка 2', 'btn2'),
-    Markup.button.callback('Кнопка 3', 'btn2'),
-  ],
-  [Markup.button.callback('Кнопка 4', 'btn2')],
-]);
-
-export interface MyCoolContext extends Context {
-  update: TelegrafUpdate;
-}
+import { Context, Scenes } from 'telegraf';
 
 @Update()
 export class TelegramBotUpdate {
