@@ -17,4 +17,9 @@ export class GitlabWebhookController {
     const body = req.body;
     this.gitlabService.sendStageDeployNotification(body);
   }
+
+  @Post('gol')
+  golHandler() {
+    this.gitlabService.sendGolNotification();
+  }
 }
