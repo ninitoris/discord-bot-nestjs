@@ -3,7 +3,7 @@ import { GitlabWebhookController } from './gitlab-webhook.controller';
 import { GitlabWebhookService } from './gitlab-webhook.service';
 import { GitlabMiddleware } from './middleware/gitlab.middleware';
 import { MergeRequestService } from './services/merge-request.service';
-import { GitLabApiMobule } from '../gitlab-api/gitlab-api.module';
+import { GitLabApiModule } from '../gitlab-api/gitlab-api.module';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import { GitLabUserService } from './services/gitlab-user.service';
 import { UtilsModule } from '@src/utils/utils.module';
@@ -19,7 +19,7 @@ import { TelegramBotModule } from '@src/telegram-bot/telegram-bot.module';
 При необходимости формирует уведомление и отдает его в discord notification модуль
 */
 @Module({
-  imports: [GitLabApiMobule, UtilsModule, TelegramBotModule],
+  imports: [GitLabApiModule, UtilsModule, TelegramBotModule],
   controllers: [GitlabWebhookController],
   providers: [
     GitlabWebhookService,
