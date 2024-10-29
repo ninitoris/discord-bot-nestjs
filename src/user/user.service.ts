@@ -8,11 +8,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './entities/users.entity';
 import { Repository } from 'typeorm';
 import { GitLabApiService } from '../gitlab-api/gitlab-api.service';
+import { UserSettings } from './entities/usersettings.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(Users) private readonly userRepository: Repository<Users>,
+    @InjectRepository(UserSettings)
+    private readonly userSettingsRepository: Repository<UserSettings>, // Добавьте репозиторий для UserSettings
     private readonly gitlabApi: GitLabApiService,
   ) {}
 
@@ -37,6 +40,11 @@ export class UserService {
       gitlabName: String(userInfo?.username).toLowerCase(),
       telegramID: createUserDto?.telegramID,
     });
+
+    const userSettings = new UserSettings();
+    userSettings.user = newUser;
+
+    await this.userSettingsRepository.save(userSettings);
 
     return { newUser };
   }
