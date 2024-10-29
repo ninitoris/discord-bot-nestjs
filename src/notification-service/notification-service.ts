@@ -14,8 +14,16 @@ export class NotificationService {
     private readonly discordNotificationStrategy: DiscordNotificationStrategy,
     private readonly telegramNotificationStrategy: TelegramNotificationStrategy,
   ) {
-    //TODO
-    this.strategies.push(discordNotificationStrategy);
+    const useDiscord = process.env.USE_DISCORD === 'true';
+    const useTelegram = process.env.USE_TELEGRAM === 'true';
+
+    if (useDiscord) {
+      this.strategies.push(discordNotificationStrategy);
+    }
+
+    if (useTelegram) {
+      this.strategies.push(telegramNotificationStrategy);
+    }
   }
 
   sendNotification(options: GeneralNotificationType) {
