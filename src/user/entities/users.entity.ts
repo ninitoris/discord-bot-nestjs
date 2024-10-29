@@ -17,8 +17,8 @@ export class Users {
   @Column({ default: false })
   female: boolean;
 
-  @Column()
-  orgID: string;
+  @Column({ nullable: true })
+  orgID: string | null;
 
   @Column()
   gitlabID: number;
@@ -29,8 +29,11 @@ export class Users {
   @Column({ nullable: true })
   discordID: string | null;
 
-  @Column()
-  telegramID: number;
+  @Column({ nullable: true })
+  telegramID: number | null;
+
+  @Column({ nullable: true })
+  telegramUsername: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

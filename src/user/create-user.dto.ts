@@ -1,7 +1,7 @@
 export class CreateUserDto {
   gitlabName: string;
 
-  telegramID: number;
+  telegramID?: number;
 }
 
 export class GetUserByTgDto {

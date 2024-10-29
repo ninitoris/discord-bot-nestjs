@@ -33,11 +33,9 @@ export class UserService {
 
     const newUser = await this.userRepository.save({
       name: String(userInfo?.name),
-      orgID: 'IPC',
       gitlabID: userInfo?.id,
-      discordID: null,
       gitlabName: String(userInfo?.username).toLowerCase(),
-      telegramID: createUserDto.telegramID,
+      telegramID: createUserDto?.telegramID,
     });
 
     return { newUser };
