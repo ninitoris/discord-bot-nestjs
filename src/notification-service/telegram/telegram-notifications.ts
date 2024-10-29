@@ -95,7 +95,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     const user = this.gitLabUserService.getUserById(userId);
     if (!user) return;
 
-    const tag = '@' + user.telegramUsername || user.irlName;
+    const tag = '@' + (user.telegramUsername || user.irlName);
     const usersTelegramID = user.telegramID;
 
     return {
