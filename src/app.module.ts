@@ -5,6 +5,7 @@ import { GitlabWebhookModule } from './gitlab-webhook/gitlab-webhook.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
+import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
 
 @Module({
   imports: [
@@ -15,17 +16,32 @@ import { UserModule } from './user/user.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: parseInt(configService.get('DB_PORT'), 10),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
-        synchronize: true,
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/migrations/*{.ts,.js}'],
-      }),
+      useFactory: (configService: ConfigService) => {
+        const isProduction = configService.get('NODE_ENV') === 'true';
+        const isSyncEnable =
+          isProduction &&
+          configService.get(ENVIRONMENT_KEY.TYPEORM_FORCE) === 'true';
+        const isLoggingEnable =
+          configService.get(ENVIRONMENT_KEY.TYPEORM_LOGGING) === 'true';
+        const isAutoLoadEntityEnabled =
+          isProduction &&
+          configService.get(ENVIRONMENT_KEY.TYPEORM_AUTO_LOAD_ENTITY) ===
+            'true';
+
+        return {
+          logging: isLoggingEnable,
+          type: 'postgres',
+          host: configService.get(ENVIRONMENT_KEY.DB_HOST),
+          port: parseInt(configService.get(ENVIRONMENT_KEY.DB_PORT), 10),
+          username: configService.get(ENVIRONMENT_KEY.DB_USERNAME),
+          password: configService.get(ENVIRONMENT_KEY.DB_PASSWORD),
+          database: configService.get(ENVIRONMENT_KEY.DB_NAME),
+          synchronize: isSyncEnable,
+          autoLoadEntities: isAutoLoadEntityEnabled,
+          entities: ['dist/**/*.entity{.ts,.js}'],
+          migrations: [__dirname + '/migrations/*{.ts,.js}'],
+        };
+      },
       inject: [ConfigService],
     }),
     UserModule,
