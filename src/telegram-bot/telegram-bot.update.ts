@@ -16,6 +16,7 @@ import {
 } from 'nestjs-telegraf';
 import { Context, Scenes } from 'telegraf';
 
+/*
 @Update()
 export class TelegramBotUpdate {
   constructor(private readonly mm: MessageManager) {}
@@ -59,5 +60,16 @@ export class TelegramBotUpdate {
     }
 
     await this.mm.msg(ctx, StartMenuText, StartMenuMarkup);
+  }
+}
+*/
+
+@Update()
+export class TelegramBotUpdate {
+  constructor(private readonly mm: MessageManager) {}
+
+  @On('text')
+  async onText(@Ctx() ctx: Context) {
+    await ctx.deleteMessage();
   }
 }
