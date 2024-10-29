@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
 import { NotificationStrategy } from '@src/notification-service/notification-strategy';
@@ -6,7 +8,10 @@ import { EmbedBuilder, WebhookClient } from 'discord.js';
 
 @Injectable()
 export class DiscordNotificationStrategy implements NotificationStrategy {
-  constructor(private readonly gitLabUserService: GitLabUserService) {}
+  constructor(
+    private readonly gitLabUserService: GitLabUserService,
+    private readonly configService: ConfigService,
+  ) {}
 
   public readonly gitlabColor = 0xfc6d26;
   public readonly gitlabLogo =
@@ -42,7 +47,7 @@ export class DiscordNotificationStrategy implements NotificationStrategy {
     };
 
     const webhookClient = new WebhookClient({
-      url: process.env.DISCORD_WEBHOOK,
+      url: this.configService.get(ENVIRONMENT_KEY.DISCORD_WEBHOOK),
     });
 
     await webhookClient.send(notification);

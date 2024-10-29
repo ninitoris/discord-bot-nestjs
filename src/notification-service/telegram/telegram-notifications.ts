@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import {
   GeneralNotificationType,
@@ -12,13 +14,16 @@ interface TelegramMessageType extends GeneralNotificationType {}
 
 @Injectable()
 export class TelegramNotificationStrategy implements NotificationStrategy {
-  private readonly chatId = process.env.TELEGRAM_CHAT_ID;
-
   constructor(
     @InjectBot() private readonly bot: Telegraf,
     private readonly gitLabUserService: GitLabUserService,
     private readonly utils: UtilsService,
+    private readonly configService: ConfigService,
   ) {}
+
+  private readonly chatId = this.configService.get(
+    ENVIRONMENT_KEY.TELEGRAM_CHAT_ID,
+  );
 
   async sendNotification(options: TelegramMessageType) {
     console.log(options);

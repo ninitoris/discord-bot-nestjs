@@ -1,4 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
 import {
   IApprovalsInfo,
   type UserInfo,
@@ -10,12 +12,12 @@ export class GitLabApiService {
   private axios: AxiosInstance;
   private readonly logger = new Logger(GitLabApiService.name);
 
-  constructor() {
-    const token = process.env.GITLAB_TOKEN;
+  constructor(private readonly configService: ConfigService) {
+    const token = this.configService.get(ENVIRONMENT_KEY.GITLAB_TOKEN);
     if (!token) {
       throw new Error('No GitLab token in env');
     }
-    const url = process.env.GITLAB_API_URL;
+    const url = this.configService.get(ENVIRONMENT_KEY.GITLAB_API_URL);
     if (!url) {
       throw new Error('No GitLab API url in env');
     }
@@ -32,7 +34,7 @@ export class GitLabApiService {
     mergeRequestId: number,
   ): Promise<IApprovalsInfo | undefined> {
     const url = `/projects/${projectId}/merge_requests/${mergeRequestId}/approvals`;
-    // console.log('querying: ' + process.env.GITLAB_API_URL + url);
+
     return this.axios
       .get(url)
       .then((res) => {
