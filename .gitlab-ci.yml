@@ -36,6 +36,7 @@ deploy:
       when: on_success
     - when: never
   script:
+    - docker compose up -d postgres
     - docker stop $CONTAINER_NAME || echo Contaiter not up
     - docker rm $CONTAINER_NAME || echo Contaiter not found
     - docker run --name $CONTAINER_NAME -d --restart always -p $PORT:8444 -e GITLAB_TOKEN=$GITLAB_TOKEN -e DISCORD_WEBHOOK=$DISCORD_WEBHOOK $CI_REGISTRY_IMAGE
