@@ -36,5 +36,5 @@ deploy:
       when: on_success
     - when: never
   script:
-    - docker-compose down
-    - docker-compose up -d
+    - docker compose down
+    - docker compose up -d
