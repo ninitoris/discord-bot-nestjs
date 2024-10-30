@@ -22,8 +22,15 @@ export function decryptEnvironmentVariables() {
   const encryptedText = encryptedBuffer.subarray(16); // Remaining is the encrypted data
 
   // Derive key and IV using pbkdf2Sync
-  const key = crypto.pbkdf2Sync(encryptionPassword, salt, 133712, 32, 'sha256');
-  const iv = crypto.pbkdf2Sync(encryptionPassword, salt, 133712, 16, 'sha256');
+  const derivedKey = crypto.pbkdf2Sync(
+    encryptionPassword,
+    salt,
+    133712,
+    48,
+    'sha256',
+  );
+  const key = derivedKey.subarray(0, 32);
+  const iv = derivedKey.subarray(32);
 
   const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
   let decrypted = decipher.update(encryptedText, undefined, 'utf8');
