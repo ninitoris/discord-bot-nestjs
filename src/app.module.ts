@@ -17,7 +17,7 @@ import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const isProduction = configService.get('NODE_ENV') === 'true';
+        const isProduction = configService.get('NODE_ENV') === 'production';
         const isSyncEnable =
           isProduction &&
           configService.get(ENVIRONMENT_KEY.TYPEORM_FORCE) === 'true';
