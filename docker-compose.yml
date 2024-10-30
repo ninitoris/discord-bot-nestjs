@@ -13,6 +13,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  discordbot:
+    image: $CI_REGISTRY_IMAGE:latest  
+    container_name: discordbot
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: axadmin
+      DB_PASSWORD: DontEatWatermelons
+      DB_NAME: gitlab_notifications
+    ports:
+      - "8445:8444"
+
 volumes:
   postgres_data:
     driver: local

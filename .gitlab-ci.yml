@@ -21,14 +21,14 @@ build image:
   script:
     - cp ${PROD_ENV} .env
     - cp ${PROD_ENV_ENC} .env.enc
-    - docker build . -t $CI_REGISTRY_IMAGE
-    - docker push $CI_REGISTRY_IMAGE
+    - docker build . -t $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:latest
 
 deploy:
   stage: deploy
   needs:
     - build image
-  tags: 
+  tags:
     - deploy
   interruptible: false
   rules:
@@ -36,7 +36,5 @@ deploy:
       when: on_success
     - when: never
   script:
-    - docker compose up -d postgres
-    - docker stop $CONTAINER_NAME || echo Contaiter not up
-    - docker rm $CONTAINER_NAME || echo Contaiter not found
-    - docker run --name $CONTAINER_NAME -d --restart always -p $PORT:8444 $CI_REGISTRY_IMAGE
+    - docker-compose down
+    - docker-compose up -d
