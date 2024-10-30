@@ -14,6 +14,7 @@ FROM registry.interprocom.ru/ipc/axioma/axi/rea/rea-axioma-ui/node:22.3.0
 
 WORKDIR /usr/local/discord-bot/
 ENV TZ=Europe/Moscow
+ENV NODE_ENV=production
 
 COPY package*.json .
 

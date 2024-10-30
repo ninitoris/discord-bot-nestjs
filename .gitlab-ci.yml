@@ -20,7 +20,7 @@ build image:
     - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - cp ${PROD_ENV} .env
-    - cat .env
+    - cp ${PROD_ENV_ENC} .env.enc
     - docker build . -t $CI_REGISTRY_IMAGE
     - docker push $CI_REGISTRY_IMAGE
 
@@ -39,4 +39,4 @@ deploy:
     - docker compose up -d postgres
     - docker stop $CONTAINER_NAME || echo Contaiter not up
     - docker rm $CONTAINER_NAME || echo Contaiter not found
-    - docker run --name $CONTAINER_NAME -d --restart always -p $PORT:8444 -e GITLAB_TOKEN=$GITLAB_TOKEN -e DISCORD_WEBHOOK=$DISCORD_WEBHOOK $CI_REGISTRY_IMAGE
+    - docker run --name $CONTAINER_NAME -d --restart always -p $PORT:8444 $CI_REGISTRY_IMAGE
