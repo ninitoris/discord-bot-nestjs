@@ -20,6 +20,7 @@ COPY package*.json .
 
 RUN npm ci --omit=dev
 COPY .env .
+COPY .env.enc .
 COPY --from=build /usr/local/discord-bot-build/dist ./dist
 
 EXPOSE 8444
