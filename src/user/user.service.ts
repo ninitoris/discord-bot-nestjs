@@ -1,9 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import {
-  CreateUserDto,
-  GetUserByGlDto,
-  GetUserByTgDto,
-} from './create-user.dto';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './entities/users.entity';
 import { Repository } from 'typeorm';
@@ -30,46 +26,56 @@ export class UserService {
         name: userInfo?.name,
       },
     });
-
     if (isExist)
       throw new BadRequestException('Пользователь уже зарегестрирован');
 
     const newUser = await this.userRepository.save({
-      name: String(userInfo?.name),
+      name: userInfo?.name,
       gitlabID: userInfo?.id,
-      gitlabName: String(userInfo?.username).toLowerCase(),
+      gitlabName: userInfo?.username.toLowerCase(),
       telegramID: createUserDto?.telegramID,
+      telegramUsername: createUserDto?.telegramUsername,
+      orgID: createUserDto?.orgID,
+      createdBy: createUserDto?.createdBy,
     });
 
     const userSettings = new UserSettings();
     userSettings.user = newUser;
+    if (createUserDto.settings) {
+      userSettings.useTelegram = createUserDto.settings.useTelegram ?? false;
+      userSettings.useDiscord = createUserDto.settings.useDiscord ?? false;
+      userSettings.tgGroupChatNotify =
+        createUserDto.settings.tgGroupChatNotify ?? false;
+      userSettings.tgPrivateMessageNotify =
+        createUserDto.settings.tgPrivateMessageNotify ?? false;
+    }
 
     await this.userSettingsRepository.save(userSettings);
 
     return { newUser };
   }
 
-  async findByTgID(getUserByTgDto: GetUserByTgDto): Promise<Users | undefined> {
-    const user = await this.userRepository.findOne({
-      where: {
-        telegramID: getUserByTgDto.telegramID,
-      },
-    });
-    if (!user) return undefined;
+  async findByTelegram(telegramID: number): Promise<Users | HttpException> {
+    const user = await this.userRepository.findOne({ where: { telegramID } });
+
+    if (!user) throw new HttpException('User Not Found', 404);
 
     return user;
   }
 
-  async findByGitlabName(
-    getUserByGlDto: GetUserByGlDto,
-  ): Promise<Users | undefined> {
-    const user = await this.userRepository.findOne({
-      where: {
-        gitlabName: getUserByGlDto.gitlabName,
-      },
-    });
-    if (!user) return undefined;
+  async findByGitlabName(gitlabName: string): Promise<Users | HttpException> {
+    const user = await this.userRepository.findOne({ where: { gitlabName } });
+
+    if (!user) throw new HttpException('User Not Found', 404);
 
     return user;
+  }
+
+  async getAllUsers(): Promise<Users[] | HttpException> {
+    const users = await this.userRepository.find();
+
+    if (!users) throw new HttpException('Users Not Found', 404);
+
+    return users;
   }
 }

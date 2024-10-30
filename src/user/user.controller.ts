@@ -1,5 +1,12 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { CreateUserDto, GetUserByTgDto } from './create-user.dto';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -7,8 +14,18 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findByID(@Body() getUserDto: GetUserByTgDto) {
-    return this.userService.findByTgID(getUserDto);
+  getAll() {
+    return this.userService.getAllUsers();
+  }
+
+  @Get('gitlab/:username')
+  findByGitlab(@Param('username') gitlabName: string) {
+    return this.userService.findByGitlabName(gitlabName);
+  }
+
+  @Get('telegram/:id')
+  findByTelegram(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findByTelegram(id);
   }
 
   @Post()
