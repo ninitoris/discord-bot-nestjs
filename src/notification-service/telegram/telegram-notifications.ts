@@ -9,6 +9,7 @@ import {
 import { UtilsService } from '@src/utils/utils.service';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
+import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 
 interface TelegramMessageType extends GeneralNotificationType {}
 
@@ -44,13 +45,26 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     messageBodyWithTags += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
     messageBodyWithTags += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
 
-    this.bot.telegram.sendMessage(this.chatId, messageBodyWithTags, {
+    const extra: ExtraReplyMessage = {
       parse_mode: 'MarkdownV2',
-      disable_notification: true,
       link_preview_options: {
         is_disabled: true, // выключил превью ссылок, потому что ссылки на gitlab.interprocom.ru у нас выглядят не очень красиво
       },
-    });
+    };
+
+    const messageThreadId = this.configService.get(
+      ENVIRONMENT_KEY.MESSAGE_THREAD_ID,
+    );
+
+    if (messageThreadId) {
+      extra.message_thread_id = messageThreadId; // для суперчата
+    }
+
+    await this.bot.telegram.sendMessage(
+      this.chatId,
+      messageBodyWithTags,
+      extra,
+    );
 
     if (usersTelegramIDs.length) {
       let messageBodyNoTags = '';
@@ -58,14 +72,16 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
       messageBodyNoTags += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
       messageBodyNoTags += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
 
+      if (messageThreadId) {
+        delete extra.message_thread_id;
+      }
+
       for (const usersTelegramID of usersTelegramIDs) {
-        this.bot.telegram.sendMessage(usersTelegramID, messageBodyNoTags, {
-          parse_mode: 'MarkdownV2',
-          disable_notification: true,
-          link_preview_options: {
-            is_disabled: true,
-          },
-        });
+        await this.bot.telegram.sendMessage(
+          usersTelegramID,
+          messageBodyNoTags,
+          extra,
+        );
       }
     }
   }
