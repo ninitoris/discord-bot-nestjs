@@ -9,7 +9,10 @@ import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
 import { GitlabUserDto } from '@src/gitlab-webhook/dto/gitlabUser.dto';
 import { MergeRequestChangesDto } from '@src/gitlab-webhook/dto/mergeRequest/mergeRequestChanges.dto';
 import { NotificationService } from '@src/notification-service/notification-service';
-import { GeneralNotificationType } from '@src/notification-service/notification-strategy';
+import {
+  GeneralNotificationType,
+  TextWithURL,
+} from '@src/notification-service/notification-strategy';
 
 @Injectable()
 export class MergeRequestService {
@@ -105,27 +108,38 @@ export class MergeRequestService {
 
     const authorId = objectAttributes.author_id;
     const user = this.gitlabUserService.getUserById(authorId);
-    const embedTitle = `${user.irlName} открыл${user.female ? 'а' : ''} МР`;
+    const notificationDescription: TextWithURL = {
+      text: `${user.irlName} открыл${user.female ? 'а' : ''} МР`,
+      url: objectAttributes.url,
+    };
 
-    let embedDescription = '';
+    const additionalInfo: TextWithURL[] = [];
     if (nextReviewer) {
-      embedDescription += `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`;
+      additionalInfo.push({
+        text: `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`,
+      });
     } else {
-      embedDescription += `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`;
+      additionalInfo.push({
+        text: `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`,
+      });
     }
-    embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
-    embedDescription +=
-      this.gitlabUtils.addMergeRequestDescription(objectAttributes);
 
-    embedDescription += this.gitlabUtils.addDefaultFooter({
-      repo: objectAttributes.target.name,
-    });
+    additionalInfo.push(
+      this.gitlabUtils.addMergeRequestTextAndLink(objectAttributes),
+      {
+        text: this.gitlabUtils.addMergeRequestDescription(objectAttributes),
+      },
+      {
+        text: this.gitlabUtils.addDefaultFooter({
+          repo: objectAttributes.target.name,
+        }),
+      },
+    );
 
     const notification: GeneralNotificationType = {
       notificationTitle: `МР!`,
-      notificationSubject: embedTitle,
-      notificationDescription: embedDescription,
-      notificationUrl: objectAttributes.url,
+      notificationDescription,
+      additionalInfo,
       notifyUsersIDs: [nextReviewer || assignee],
     };
 
@@ -159,24 +173,32 @@ export class MergeRequestService {
     const user = this.gitlabUserService.getUserById(gitlabUser.id);
     const nextReviewerUserName =
       this.gitlabUserService.getUserNameById(nextReviewer);
-    const embedTitle = `${user.irlName} апрувнул${user.female ? 'а' : ''} МР`;
+    const notificationDescription: TextWithURL = {
+      text: `${user.irlName} апрувнул${user.female ? 'а' : ''} МР`,
+      url: objectAttributes.url,
+    };
 
     // опять же делаем поправку на бесплатный гитлаб. в платном мог бы быть еще один ревьюер, но тут далее идет только ассайни
-    let embedDescription = `Асайни: ${nextReviewerUserName}\n`;
-    embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
-    embedDescription +=
-      this.gitlabUtils.addMergeRequestDescription(objectAttributes);
-
-    embedDescription += this.gitlabUtils.addDefaultFooter({
-      repo: objectAttributes.target.name,
-      lastUpdateTime: objectAttributes.updated_at,
-    });
+    const additionalInfo: TextWithURL[] = [
+      {
+        text: `Асайни: ${nextReviewerUserName}\n`,
+      },
+      this.gitlabUtils.addMergeRequestTextAndLink(objectAttributes),
+      {
+        text: this.gitlabUtils.addMergeRequestDescription(objectAttributes),
+      },
+      {
+        text: this.gitlabUtils.addDefaultFooter({
+          repo: objectAttributes.target.name,
+          lastUpdateTime: objectAttributes.updated_at,
+        }),
+      },
+    ];
 
     const notification: GeneralNotificationType = {
       notificationTitle: `МР!`,
-      notificationSubject: embedTitle,
-      notificationDescription: embedDescription,
-      notificationUrl: objectAttributes.url,
+      notificationDescription,
+      additionalInfo,
       notifyUsersIDs: [nextReviewer],
     };
     this.notificationService.sendNotification(notification);
@@ -212,23 +234,30 @@ export class MergeRequestService {
       const newReviewerUserName =
         this.gitlabUserService.getUserNameById(checkNewReviewer);
 
-      const embedTitle = `${user.irlName} изменил${user.female ? 'а' : ''} ревьюера`;
+      const notificationDescription: TextWithURL = {
+        text: `${user.irlName} изменил${user.female ? 'а' : ''} ревьюера`,
+        url: objectAttributes.url,
+      };
 
-      let embedDescription = `Новый ревьюер: ${newReviewerUserName}\n`;
-      embedDescription +=
-        this.gitlabUtils.addMergeRequestInfo(objectAttributes);
-      embedDescription +=
-        this.gitlabUtils.addMergeRequestDescription(objectAttributes);
-
-      embedDescription += this.gitlabUtils.addDefaultFooter({
-        repo: objectAttributes.target.name,
-      });
+      const additionalInfo: TextWithURL[] = [
+        {
+          text: `Новый ревьюер: ${newReviewerUserName}\n`,
+        },
+        this.gitlabUtils.addMergeRequestTextAndLink(objectAttributes),
+        {
+          text: this.gitlabUtils.addMergeRequestDescription(objectAttributes),
+        },
+        {
+          text: this.gitlabUtils.addDefaultFooter({
+            repo: objectAttributes.target.name,
+          }),
+        },
+      ];
 
       const notification: GeneralNotificationType = {
         notificationTitle: `МР!`,
-        notificationSubject: embedTitle,
-        notificationDescription: embedDescription,
-        notificationUrl: objectAttributes.url,
+        notificationDescription,
+        additionalInfo,
         notifyUsersIDs: [checkNewReviewer],
       };
       this.notificationService.sendNotification(notification);
@@ -248,22 +277,30 @@ export class MergeRequestService {
     const newAssigneeUserName =
       this.gitlabUserService.getUserNameById(newAssigneeId);
 
-    const embedTitle = `${user.irlName} изменил${user.female ? 'а' : ''} ассайни`;
+    const notificationDescription: TextWithURL = {
+      text: `${user.irlName} изменил${user.female ? 'а' : ''} ассайни`,
+      url: objectAttributes.url,
+    };
 
-    let embedDescription = `Новый ассайни: ${newAssigneeUserName}\n`;
-    embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
-    embedDescription +=
-      this.gitlabUtils.addMergeRequestDescription(objectAttributes);
-
-    embedDescription += this.gitlabUtils.addDefaultFooter({
-      repo: objectAttributes.target.name,
-    });
+    const additionalInfo: TextWithURL[] = [
+      {
+        text: `Новый ассайни: ${newAssigneeUserName}\n`,
+      },
+      this.gitlabUtils.addMergeRequestTextAndLink(objectAttributes),
+      {
+        text: this.gitlabUtils.addMergeRequestDescription(objectAttributes),
+      },
+      {
+        text: this.gitlabUtils.addDefaultFooter({
+          repo: objectAttributes.target.name,
+        }),
+      },
+    ];
 
     const notification: GeneralNotificationType = {
       notificationTitle: `МР!`,
-      notificationSubject: embedTitle,
-      notificationDescription: embedDescription,
-      notificationUrl: objectAttributes.url,
+      notificationDescription,
+      additionalInfo,
       notifyUsersIDs: [newAssigneeId],
     };
     return this.notificationService.sendNotification(notification);
@@ -299,27 +336,37 @@ export class MergeRequestService {
     }
 
     const user = this.gitlabUserService.getUserById(gitlabUser.id);
-    const embedTitle = `${user.irlName} пометил${user.female ? 'а' : ''} МР как готовый`;
+    const notificationDescription: TextWithURL = {
+      text: `${user.irlName} пометил${user.female ? 'а' : ''} МР как готовый`,
+      url: objectAttributes.url,
+    };
 
-    let embedDescription = '';
+    const additionalInfo: TextWithURL[] = [];
     if (nextReviewer) {
-      embedDescription += `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`;
+      additionalInfo.push({
+        text: `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`,
+      });
     } else {
-      `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`;
+      additionalInfo.push({
+        text: `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`,
+      });
     }
-    embedDescription += this.gitlabUtils.addMergeRequestInfo(objectAttributes);
-    embedDescription +=
-      this.gitlabUtils.addMergeRequestDescription(objectAttributes);
-
-    embedDescription += this.gitlabUtils.addDefaultFooter({
-      repo: objectAttributes.target.name,
-    });
+    additionalInfo.push(
+      this.gitlabUtils.addMergeRequestTextAndLink(objectAttributes),
+      {
+        text: this.gitlabUtils.addMergeRequestDescription(objectAttributes),
+      },
+      {
+        text: this.gitlabUtils.addDefaultFooter({
+          repo: objectAttributes.target.name,
+        }),
+      },
+    );
 
     const notification: GeneralNotificationType = {
       notificationTitle: `МР!`,
-      notificationSubject: embedTitle,
-      notificationDescription: embedDescription,
-      notificationUrl: objectAttributes.url,
+      notificationDescription,
+      additionalInfo,
       notifyUsersIDs: [nextReviewer || assignee],
     };
 

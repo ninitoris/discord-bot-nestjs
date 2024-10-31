@@ -4,6 +4,7 @@ import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
 import { NotificationStrategy } from '@src/notification-service/notification-strategy';
+import { UtilsService } from '@src/utils/utils.service';
 import { EmbedBuilder, WebhookClient } from 'discord.js';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class DiscordNotificationStrategy implements NotificationStrategy {
   constructor(
     private readonly gitLabUserService: GitLabUserService,
     private readonly configService: ConfigService,
+    private readonly utils: UtilsService,
   ) {}
 
   public readonly gitlabColor = 0xfc6d26;
@@ -20,9 +22,8 @@ export class DiscordNotificationStrategy implements NotificationStrategy {
 
   async sendNotification({
     notificationTitle,
-    notificationSubject,
     notificationDescription,
-    notificationUrl,
+    additionalInfo,
     notifyUsersIDs,
     embedColor = this.gitlabColor,
     avatarURL = this.gitlabLogo,
@@ -30,11 +31,11 @@ export class DiscordNotificationStrategy implements NotificationStrategy {
   }: DiscordNotificationType) {
     const embed = new EmbedBuilder();
     const tags = this.getDiscordTagsByUserIds(notifyUsersIDs);
-    const embedTitle = notificationSubject;
-    const embedDescription = notificationDescription;
-    const embedUrl = notificationUrl;
+    const embedUrl = notificationDescription.url ?? null;
 
-    embed.setTitle(embedTitle).setDescription(embedDescription);
+    embed
+      .setTitle(notificationDescription.text)
+      .setDescription(this.utils.getMarkdownTextWithUrl(additionalInfo, false));
 
     if (embedColor) embed.setColor(embedColor);
     if (embedUrl) embed.setURL(`${embedUrl}`);

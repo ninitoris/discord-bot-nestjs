@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TextWithURL } from '@src/notification-service/notification-strategy';
 
 type TimeType = 'hour' | 'minute' | 'second' | 'milisecond';
 
@@ -168,4 +169,37 @@ export class UtilsService {
     );
     return text;
   };
+
+  public getMarkdownTextWithUrl(
+    originalText: TextWithURL[],
+    escape: boolean,
+  ): string;
+  public getMarkdownTextWithUrl(
+    originalText: TextWithURL,
+    escape: boolean,
+  ): string;
+  public getMarkdownTextWithUrl(
+    originalText: TextWithURL | TextWithURL[],
+    escape: boolean,
+  ): string {
+    if (Array.isArray(originalText)) {
+      let message = '';
+      for (const t of originalText) {
+        message += this.getMarkdownTextWithUrl(t, escape);
+      }
+      return message;
+    } else {
+      let text: string;
+      if (escape) {
+        text = this.escapeMarkdown(originalText.text);
+      } else {
+        text = originalText.text;
+      }
+      if (originalText.url) {
+        return `[${text}](${originalText.url})`;
+      } else {
+        return text;
+      }
+    }
+  }
 }

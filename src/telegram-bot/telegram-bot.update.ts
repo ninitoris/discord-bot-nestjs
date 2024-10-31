@@ -70,7 +70,7 @@ export class TelegramBotUpdate {
 
   @On('text')
   async onText(@Ctx() ctx: Context) {
-    console.log(ctx.message);
+    // console.log(ctx.message);
     // await ctx.deleteMessage();
   }
 }
