@@ -9,6 +9,9 @@ import { UtilsModule } from '@src/utils/utils.module';
 import { UtilsService } from '@src/utils/utils.service';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { session } from 'telegraf';
+import { RegisterWizard } from './scenes/register.wizard';
+import { GitLabApiModule } from '../gitlab-api/gitlab-api.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -20,6 +23,8 @@ import { session } from 'telegraf';
         token: configService.get<string>('TELEGRAM_TOKEN'),
       }),
     }),
+    GitLabApiModule,
+    UserModule,
   ],
   providers: [
     TelegramBotUpdate,
@@ -28,6 +33,7 @@ import { session } from 'telegraf';
     UtilsService,
     MessageStore,
     MessageManager,
+    RegisterWizard,
   ],
   exports: [],
 })

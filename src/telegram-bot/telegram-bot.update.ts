@@ -1,22 +1,12 @@
-import { Logger } from '@nestjs/common';
 import { MessageManager } from '@src/telegram-bot/message-manager/message-manager';
 import {
   NavigationButtons,
   StartMenuMarkup,
   StartMenuText,
 } from '@src/telegram-bot/telegram-bot.constants';
-import {
-  Action,
-  Command,
-  Ctx,
-  Hears,
-  On,
-  Start,
-  Update,
-} from 'nestjs-telegraf';
+import { Action, Command, Ctx, Hears, Start, Update } from 'nestjs-telegraf';
 import { Context, Scenes } from 'telegraf';
 
-/*
 @Update()
 export class TelegramBotUpdate {
   constructor(private readonly mm: MessageManager) {}
@@ -35,42 +25,20 @@ export class TelegramBotUpdate {
     await ctx.scene.enter('notificationsSetup');
   }
 
-  // @Command('test')
-  // async test(ctx: Scenes.WizardContext) {
-  //   await ctx.scene.enter('test');
-  // }
-
-  // это должно быть в конце
-  @On('text')
-  async onText(@Ctx() ctx: Context) {
-    if (!('text' in ctx.message)) {
-      Logger.log(ctx.message);
-      return;
-    }
-
-    await this.mm.userSentSomething(ctx);
-
-    // console.log(ctx.message);
-
-    const message = ctx.message.text;
-    const regex = /[гГ][оО]+[лЛ]/;
-    if (regex.test(message)) {
-      await this.mm.sendNewMessage(ctx, 'ГООООООООООЛ');
-      return;
-    }
-
-    await this.mm.msg(ctx, StartMenuText, StartMenuMarkup);
+  @Action('registerUser')
+  @Hears(NavigationButtons.regiseter)
+  @Command('registerUser')
+  async regiseterUser(ctx: Scenes.WizardContext) {
+    await ctx.scene.enter('registerUser');
   }
-}
-*/
 
-@Update()
-export class TelegramBotUpdate {
-  constructor(private readonly mm: MessageManager) {}
+  @Action('approve')
+  protected async approve(@Ctx() ctx: Context) {
+    await this.mm.msg(ctx, 'да все топчик');
+  }
 
-  @On('text')
-  async onText(@Ctx() ctx: Context) {
-    // console.log(ctx.message);
-    // await ctx.deleteMessage();
+  @Action('reject')
+  protected async reject(@Ctx() ctx: Context) {
+    await this.mm.msg(ctx, 'не топчик');
   }
 }

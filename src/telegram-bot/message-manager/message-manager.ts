@@ -3,7 +3,11 @@ import { Context, Telegraf } from 'telegraf';
 import * as tg from 'telegraf/types';
 import { InjectBot } from 'nestjs-telegraf';
 import { Injectable, Logger } from '@nestjs/common';
-import { CustomContext } from '@src/telegram-bot/types/telegram-bot-types';
+import {
+  CustomContext,
+  RegisterData,
+  ExtraWithNewUser,
+} from '@src/telegram-bot/types/telegram-bot-types';
 
 @Injectable()
 export class MessageManager {
@@ -142,5 +146,20 @@ export class MessageManager {
   ) {
     await this.sendMessageOrEditLast(ctx, text, extra);
     await this.cleanUpChat(ctx.chat.id);
+  }
+
+  /**Отправить сообщение в чат по его id*/
+  async approveMsg(
+    chatID: number,
+    text: string,
+    extra?:
+      | (tg.Convenience.ExtraReplyMessage & { newUser: RegisterData })
+      | (tg.Convenience.ExtraEditMessageText & { newUser: RegisterData }),
+  ) {
+    await this.bot.telegram.sendMessage(
+      chatID,
+      text,
+      extra as ExtraWithNewUser,
+    );
   }
 }
