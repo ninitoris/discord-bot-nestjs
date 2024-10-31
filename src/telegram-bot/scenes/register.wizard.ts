@@ -332,6 +332,7 @@ export class RegisterWizard {
       discordName: session.discordName ?? null,
       female: session.female ?? false,
       userInfo: session.userInfo,
+      createdBy: ctx.chat.username,
     };
 
     await this.mm.sendMsgInChat(chatId, messageText, msgButtons);

@@ -36,6 +36,7 @@ export class UserService {
       telegramID: createUserDto?.telegramID,
       telegramUsername: createUserDto?.telegramUsername,
       orgID: createUserDto?.orgID,
+      female: createUserDto.female,
       createdBy: createUserDto?.createdBy,
     });
 
