@@ -15,7 +15,7 @@ services:
 
   discordbot:
     image: $CI_REGISTRY_IMAGE:latest  
-    container_name: discordbot
+    container_name: $CONTAINER_NAME
     restart: always
     environment:
       DB_HOST: postgres
@@ -24,7 +24,7 @@ services:
       DB_PASSWORD: DontEatWatermelons
       DB_NAME: gitlab_notifications
     ports:
-      - "8445:8444"
+      - "$PORT:8444"
 
 volumes:
   postgres_data:

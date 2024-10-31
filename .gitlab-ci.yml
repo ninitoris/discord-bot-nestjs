@@ -5,6 +5,7 @@ stages:
 variables:
   CONTAINER_NAME: 'discordbot'
   PORT: 8445
+  MAIN_CD_BRANCH: main
 
 build image:
   image: $CI_DOCKER_IMAGE
@@ -13,7 +14,7 @@ build image:
     - build
   interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == $MAIN_CD_BRANCH'
       when: always
     - when: never
   before_script:
@@ -32,7 +33,7 @@ deploy:
     - deploy
   interruptible: false
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == $MAIN_CD_BRANCH'
       when: on_success
     - when: never
   script:

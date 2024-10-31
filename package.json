@@ -19,10 +19,17 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:generate": "npx ts-node -r tsconfig-paths/register node_modules/typeorm/cli.js migration:generate src/migrations/UpdateUsersTable -d src/data-source.ts",
-    "migration:run": "npx ts-node -r tsconfig-paths/register node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
     "env:encrypt": "openssl enc -aes-256-cbc -a -salt -pbkdf2 -iter 133712 -in .env.production -out .env.enc -pass pass:xXArbuzArbuzPerniXx",
-    "env:decrypt": "openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 133712 -in .env.enc -out .env.decrypted -pass pass:xXArbuzArbuzPerniXx"
+    "env:decrypt": "openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 133712 -in .env.enc -out .env.decrypted -pass pass:xXArbuzArbuzPerniXx",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "schema:sync": "npx typeorm-ts-node-commonjs schema:sync -d ./src/database/data-source.ts",
+    "typeorm:cache": "npx typeorm-ts-node-commonjs cache:clear",
+    "schema:drop": "npx typeorm-ts-node-commonjs -d ./src/database/data-source.ts",
+    "migration:create": "typeorm migration:create ./src/migrations/schema-update",
+    "migration:generate": "npx typeorm-ts-node-commonjs migration:generate ./src/migrations/auto -d ./src/database/data-source.ts",
+    "migration:show": "npx typeorm-ts-node-commonjs migration:show -d ./src/database/data-source.ts",
+    "migration:run": "npx typeorm-ts-node-commonjs migration:run -d  ./src/database/data-source.ts",
+    "migration:revert": "npx typeorm-ts-node-commonjs migration:revert -d ./src/database/data-source.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",

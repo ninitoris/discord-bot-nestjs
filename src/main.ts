@@ -5,7 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import 'reflect-metadata';
 import { ValidationPipe } from '@nestjs/common';
-import { AppDataSource } from './data-source';
+import ConnectionSource from './database/data-source.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,7 +13,7 @@ async function bootstrap() {
   // Валидация сразу на все эндпоинты
   app.useGlobalPipes(new ValidationPipe());
 
-  await AppDataSource.initialize();
+  await ConnectionSource.initialize();
 
   await app.listen(8444);
 }

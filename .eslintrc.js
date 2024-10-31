@@ -15,7 +15,7 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js', 'dist/*'],
+  ignorePatterns: ['.eslintrc.js', 'dist/*', 'src/migrations/*'],
   rules: {
     'prettier/prettier': ['error', { endOfLine: 'auto' }],
     '@typescript-eslint/interface-name-prefix': 'off',
