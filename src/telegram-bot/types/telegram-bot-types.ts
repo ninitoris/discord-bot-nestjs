@@ -27,6 +27,7 @@ export interface CustomWizardContext extends Scenes.WizardContext {
 
 export interface RegisterData {
   gitlabName: string;
+  name: string;
   telegramID?: number;
   telegramUsername?: string;
   orgID?: string;

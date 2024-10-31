@@ -9,10 +9,7 @@ import {
   WizardStep,
 } from 'nestjs-telegraf';
 import { Markup, Scenes, Telegraf } from 'telegraf';
-import {
-  ExtraWithNewUser,
-  RegisterWizardContext,
-} from '../types/telegram-bot-types';
+import { RegisterWizardContext } from '../types/telegram-bot-types';
 import { GitLabApiService } from '../../gitlab-api/gitlab-api.service';
 import { StartMenuMarkup, StartMenuText } from '../telegram-bot.constants';
 import { UtilsService } from '../../utils/utils.service';
@@ -105,16 +102,17 @@ export class RegisterWizard {
 
   @WizardStep(Steps.selectName)
   protected async selectName(@Context() ctx: RegisterWizardContext) {
-    const validName = validateAndFormatName(ctx.session.userInfo.name);
+    const name = ctx.session.name ?? ctx.session.userInfo.name;
+    const validName = validateAndFormatName(name);
     if (!validName) {
-      const msgText = `👤 Ваше имя и фамилия должны быть на русском языке\n❌ ${ctx.session.userInfo.name}`;
+      const msgText = `👤 Ваше имя и фамилия должны быть на русском языке\n❌ ${name}`;
       const msgButtons = Markup.inlineKeyboard([
         [Markup.button.callback('📝 Изменить имя', 'nameIsWrong')],
         this.backButton,
       ]);
       return await this.mm.msg(ctx, msgText, msgButtons);
     }
-    const msgText = `👤 Имя и фамилия верные?\n${ctx.session.userInfo.name}`;
+    const msgText = `👤 Имя и фамилия верные?\n${name}`;
 
     const msgButtons = Markup.inlineKeyboard([
       [
@@ -150,24 +148,24 @@ export class RegisterWizard {
     if (!('message' in ctx.update && 'text' in ctx.update.message)) {
       return;
     }
-    const invalidName = `🫠 Неправильное имя, попробуйте снова.`;
+    const invalidNameMsg = `🫠 Неправильное имя, попробуйте снова.`;
     await this.mm.userSentSomething(ctx);
     const name = ctx.update.message.text;
 
     if (typeof name !== 'string') {
-      await this.mm.msg(ctx, invalidName, this.goBackButton);
+      await this.mm.msg(ctx, invalidNameMsg, this.goBackButton);
       ctx.wizard.selectStep(Steps.editName);
       return;
     }
 
     const formattedName = validateAndFormatName(name);
     if (!formattedName) {
-      await this.mm.msg(ctx, invalidName, this.goBackButton);
+      await this.mm.msg(ctx, invalidNameMsg, this.goBackButton);
       ctx.wizard.selectStep(Steps.editName);
       return;
     }
 
-    ctx.session.userInfo.name = formattedName;
+    ctx.session.name = formattedName;
     ctx.wizard.selectStep(Steps.editName);
     await this.selectName(ctx);
   }
@@ -237,19 +235,19 @@ export class RegisterWizard {
       return;
     }
 
-    const invalidName = `🫠 Неправильное имя, попробуйте снова.`;
+    const invalidNameMsg = `🫠 Неправильное имя, попробуйте снова.`;
     await this.mm.userSentSomething(ctx);
     const discordName = ctx.update.message.text;
 
     if (typeof discordName !== 'string') {
-      await this.mm.msg(ctx, invalidName, this.goBackButton);
+      await this.mm.msg(ctx, invalidNameMsg, this.goBackButton);
       ctx.wizard.selectStep(Steps.inputDiscord);
       return;
     }
 
     const validName = isValidDiscordUsername(discordName);
     if (!validName) {
-      await this.mm.msg(ctx, invalidName, this.goBackButton);
+      await this.mm.msg(ctx, invalidNameMsg, this.goBackButton);
       ctx.wizard.selectStep(Steps.inputDiscord);
       return;
     }
@@ -314,7 +312,7 @@ export class RegisterWizard {
   protected async confirm(@Context() ctx: RegisterWizardContext) {
     const chatId = this.configService.get<number>('CHAT_ID');
     const session = ctx.session;
-    const messageText = `👀 Пользователь хочет зарегистрироваться\n🦊 Ссылка на аккаунт:\n${session.userInfo.web_url}\n\n👤 Имя:\n${session?.userInfo?.name}\n\n🏭 Организация:\n${session?.orgID}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${session.discordName ? `Да, на аккаунт ${session.discordName}` : 'Нет'}`;
+    const messageText = `👀 Пользователь хочет зарегистрироваться\n🦊 Ссылка на аккаунт:\n${session.userInfo.web_url}\n\n👤 Имя:\n${session?.name}\n\n🏭 Организация:\n${session?.orgID}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${session.discordName ? `Да, на аккаунт ${session.discordName}` : 'Нет'}`;
     const msgButtons = Markup.inlineKeyboard([
       [
         Markup.button.callback('✅ Подтвердить аккаунт', 'approve'),
@@ -327,6 +325,7 @@ export class RegisterWizard {
 
     const registerData = {
       gitlabName: session.userInfo.username,
+      name: session.name,
       telegramID: ctx.chat.id ?? null,
       telegramUsername: ctx.chat.username ?? null,
       orgID: session.orgID ?? null,
@@ -335,12 +334,29 @@ export class RegisterWizard {
       userInfo: session.userInfo,
     };
 
-    const extra: ExtraWithNewUser = {
-      reply_markup: msgButtons.reply_markup,
-      newUser: registerData,
-    };
+    await this.mm.sendMsgInChat(chatId, messageText, msgButtons);
 
-    await this.mm.approveMsg(chatId, messageText, extra);
+    this.bot.action('approve', async (ctx) => {
+      const newUser = await this.userService.createUser(registerData);
+      if (!newUser) {
+        return await this.mm.msg(ctx, '💀 Произошла непредвиденная ошибка');
+      }
+
+      await this.mm.sendMsgInChat(
+        registerData.telegramID,
+        '🎉 Вы успешно прошли регистрацию!',
+      );
+
+      return await this.mm.msg(ctx, '🎉 Пользователь успешно зарегистрирован');
+    });
+
+    this.bot.action('reject', async (ctx) => {
+      await this.mm.sendMsgInChat(
+        registerData.telegramID,
+        '🙅‍♂️ Вам отклонено в регистрации',
+      );
+      return await this.mm.msg(ctx, '🙅‍♂️ Пользователю отклонено в регистрации');
+    });
   }
 
   /**Начать регистрацию сначала*/

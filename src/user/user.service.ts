@@ -30,7 +30,7 @@ export class UserService {
       throw new BadRequestException('Пользователь уже зарегестрирован');
 
     const newUser = await this.userRepository.save({
-      name: userInfo?.name,
+      name: createUserDto?.name,
       gitlabID: userInfo?.id,
       gitlabName: userInfo?.username.toLowerCase(),
       telegramID: createUserDto?.telegramID,

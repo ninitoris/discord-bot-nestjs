@@ -31,14 +31,4 @@ export class TelegramBotUpdate {
   async regiseterUser(ctx: Scenes.WizardContext) {
     await ctx.scene.enter('registerUser');
   }
-
-  @Action('approve')
-  protected async approve(@Ctx() ctx: Context) {
-    await this.mm.msg(ctx, 'да все топчик');
-  }
-
-  @Action('reject')
-  protected async reject(@Ctx() ctx: Context) {
-    await this.mm.msg(ctx, 'не топчик');
-  }
 }

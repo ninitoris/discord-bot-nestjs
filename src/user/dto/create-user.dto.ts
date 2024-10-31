@@ -14,6 +14,10 @@ export class CreateUserDto {
   @IsString()
   gitlabName: string;
 
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
   @IsNumber()
   @IsOptional()
   telegramID?: number;
