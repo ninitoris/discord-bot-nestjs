@@ -34,12 +34,17 @@ export interface RegisterData {
   discordName?: string;
   female?: boolean;
   userInfo?: UserInfo;
+  createdBy?: string;
 }
 
 export interface RegisterWizardContext extends Scenes.WizardContext {
   update: Update;
   session: RegisterData & WizardSession<WizardSessionData>;
   chat: Chat.Chat & Username;
+}
+
+export interface ChatContext extends Context {
+  chat: Chat.Chat & Partial<Username>;
 }
 
 type Username = {

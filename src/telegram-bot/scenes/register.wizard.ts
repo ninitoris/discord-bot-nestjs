@@ -9,7 +9,11 @@ import {
   WizardStep,
 } from 'nestjs-telegraf';
 import { Markup, Scenes, Telegraf } from 'telegraf';
-import { RegisterWizardContext } from '../types/telegram-bot-types';
+import {
+  ChatContext,
+  RegisterData,
+  RegisterWizardContext,
+} from '../types/telegram-bot-types';
 import { GitLabApiService } from '../../gitlab-api/gitlab-api.service';
 import { StartMenuMarkup, StartMenuText } from '../telegram-bot.constants';
 import { UtilsService } from '../../utils/utils.service';
@@ -178,6 +182,7 @@ export class RegisterWizard {
       [
         Markup.button.callback('Интерпроком', 'orgIsInterprocom'),
         Markup.button.callback('Клик', 'orgIsClick'),
+        Markup.button.callback('Ади', 'orgIsAdi'),
       ],
       this.backButton,
     ]);
@@ -195,6 +200,13 @@ export class RegisterWizard {
   @Action('orgIsClick')
   protected async orgIsClick(@Context() ctx: RegisterWizardContext) {
     ctx.session.orgID = 'Клик';
+    ctx.wizard.selectStep(Steps.selectDiscord);
+    await this.selectDiscord(ctx);
+  }
+
+  @Action('orgIsAdi')
+  protected async orgIsAdi(@Context() ctx: RegisterWizardContext) {
+    ctx.session.orgID = 'Ади';
     ctx.wizard.selectStep(Steps.selectDiscord);
     await this.selectDiscord(ctx);
   }
@@ -290,7 +302,7 @@ export class RegisterWizard {
   protected async confirmation(@Context() ctx: RegisterWizardContext) {
     const session = ctx.session;
 
-    const msgText = `👀 Проверьте данные перед отправкой\n🦊 Ссылка на аккаунт:\n${this.utilsService.escapeMarkdown(session.userInfo.web_url)}\n\n👤 Имя:\n${this.utilsService.escapeMarkdown(session?.userInfo?.name)}\n\n🏭 Организация:\n${this.utilsService.escapeMarkdown(session?.orgID)}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${session.discordName ? `Да, на аккаунт ${this.utilsService.escapeMarkdown(session.discordName)}` : 'Нет'}`;
+    const msgText = `👀 Проверьте данные перед отправкой\n🦊 Ссылка на аккаунт:\n${this.utilsService.escapeMarkdown(session.userInfo?.web_url)}\n\n👤 Имя:\n${session?.name}\n\n🏭 Организация:\n${session?.orgID}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${session.discordName ? `Да, на аккаунт ${this.utilsService.escapeMarkdown(session.discordName)}` : 'Нет'}`;
 
     const msgButtons = Markup.inlineKeyboard([
       [
@@ -310,6 +322,7 @@ export class RegisterWizard {
   /**Подтвердить аккаунт и отправить его на проверку в другой чат*/
   @Action('confirm')
   protected async confirm(@Context() ctx: RegisterWizardContext) {
+    // Переменна чата админов
     const chatId = this.configService.get<number>('CHAT_ID');
     const session = ctx.session;
     const messageText = `👀 Пользователь хочет зарегистрироваться\n🦊 Ссылка на аккаунт:\n${session.userInfo.web_url}\n\n👤 Имя:\n${session?.name}\n\n🏭 Организация:\n${session?.orgID}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${session.discordName ? `Да, на аккаунт ${session.discordName}` : 'Нет'}`;
@@ -323,7 +336,7 @@ export class RegisterWizard {
     await this.mm.msg(ctx, '✅ Аккаунт отправлен на проверку', StartMenuMarkup);
     await ctx.scene.leave();
 
-    const registerData = {
+    const registerData: RegisterData = {
       gitlabName: session.userInfo.username,
       name: session.name,
       telegramID: ctx.chat.id ?? null,
@@ -335,19 +348,27 @@ export class RegisterWizard {
       createdBy: ctx.chat.username,
     };
 
+    // Отправка сообщения в другой чат
     await this.mm.sendMsgInChat(chatId, messageText, msgButtons);
 
-    this.bot.action('approve', async (ctx) => {
+    // Регистрируем экшены внешнего чата
+    this.bot.action('approve', async (ctx: ChatContext) => {
+      if (ctx.from.username) {
+        registerData.createdBy = ctx.from.username;
+      }
+
       const newUser = await this.userService.createUser(registerData);
       if (!newUser) {
         return await this.mm.msg(ctx, '💀 Произошла непредвиденная ошибка');
       }
 
+      // Уведомляем пользователя, что он прошел регистрацию
       await this.mm.sendMsgInChat(
         registerData.telegramID,
         '🎉 Вы успешно прошли регистрацию!',
       );
 
+      clearRegisterData(registerData);
       return await this.mm.msg(ctx, '🎉 Пользователь успешно зарегистрирован');
     });
 
@@ -356,6 +377,8 @@ export class RegisterWizard {
         registerData.telegramID,
         '🙅‍♂️ Вам отклонено в регистрации',
       );
+
+      clearRegisterData(registerData);
       return await this.mm.msg(ctx, '🙅‍♂️ Пользователю отклонено в регистрации');
     });
   }
@@ -364,13 +387,15 @@ export class RegisterWizard {
   @Action('startOver')
   protected async startOver(@Context() ctx: RegisterWizardContext) {
     ctx.wizard.selectStep(Steps.greeting);
+    clearContext(ctx);
     await this.greeting(ctx);
   }
 
-  /**Возвращает на главную*/
+  /**Ворнуться на главную*/
   @Action('quit')
   protected async quit(@Context() ctx: RegisterWizardContext) {
     await ctx.scene.leave();
+    clearContext(ctx);
     await this.mm.msg(ctx, StartMenuText, StartMenuMarkup);
   }
 
@@ -434,4 +459,27 @@ const isValidDiscordUsername = (username: string): boolean => {
   const discordPattern = /^[a-zA-Zа-яёА-ЯЁ0-9._-]{2,32}$/;
 
   return discordPattern.test(username);
+};
+
+const clearRegisterData = (obj: Partial<RegisterData>) => {
+  Object.keys(obj).forEach((key) => {
+    delete obj[key as keyof RegisterData];
+  });
+};
+
+const clearContext = (ctx: RegisterWizardContext) => {
+  const sessionKeys: (keyof RegisterData)[] = [
+    'createdBy',
+    'discordName',
+    'female',
+    'gitlabName',
+    'name',
+    'telegramID',
+    'telegramUsername',
+    'userInfo',
+  ];
+
+  sessionKeys.forEach((key) => {
+    delete ctx.session[key];
+  });
 };
