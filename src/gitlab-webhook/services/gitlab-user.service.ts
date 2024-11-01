@@ -63,7 +63,8 @@ export class GitLabUserService {
     nslutsker: {
       gitlabId: 162,
       discordId: '385488276800143361',
-      irlName: 'Nikita Slutsker',
+      irlName: 'Никита Слуцкер',
+      telegramUsername: 'nikifre',
     },
     YBocharova: {
       gitlabId: 151,
@@ -75,6 +76,7 @@ export class GitLabUserService {
       gitlabId: 149,
       discordId: '495276178324717580',
       irlName: 'Василий Кочетков',
+      telegramUsername: 'shad0w_storm',
     },
     buhtijarov: {
       gitlabId: 165,
@@ -145,6 +147,7 @@ export class GitLabUserService {
       gitlabId: 275,
       discordId: '419122050230386689',
       irlName: 'Александр Герасимов',
+      telegramUsername: 'dev0ping',
     },
     AGaynulin: {
       gitlabId: 307,
