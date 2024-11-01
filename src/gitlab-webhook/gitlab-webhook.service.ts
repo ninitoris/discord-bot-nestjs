@@ -6,7 +6,10 @@ import { NoteService } from '@src/gitlab-webhook/services/note.service';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { NotificationService } from '@src/notification-service/notification-service';
-import { GeneralNotificationType } from '@src/notification-service/notification-strategy';
+import {
+  GeneralNotificationType,
+  TextWithURL,
+} from '@src/notification-service/notification-strategy';
 
 @Injectable()
 export class GitlabWebhookService {
@@ -53,17 +56,25 @@ export class GitlabWebhookService {
     const host = body.host;
     const port = body.port;
 
-    const embedTitle = 'Произошел деплой';
-    let embedDescription = `На https://${host}:${port} \n`;
+    const notificationDescription: TextWithURL = {
+      text: 'Произошел деплой',
+    };
+    const additionalInfo: TextWithURL[] = [
+      {
+        text: `На https://${host}:${port} \n`,
+      },
+    ];
 
-    embedDescription += this.gitlabUtils.addDefaultFooter({
-      repo: body.repo,
+    additionalInfo.push({
+      text: this.gitlabUtils.addDefaultFooter({
+        repo: body.repo,
+      }),
     });
 
     const notification: GeneralNotificationType = {
       notificationTitle: `GOL!`,
-      notificationSubject: embedTitle,
-      notificationDescription: embedDescription,
+      notificationDescription,
+      additionalInfo,
       notifyUsersIDs: [gitLabUserId],
     };
 
@@ -74,8 +85,8 @@ export class GitlabWebhookService {
   async sendGolNotification() {
     const notification: GeneralNotificationType = {
       notificationTitle: `ГООООООООООЛ ⚽️`,
-      notificationSubject: '',
-      notificationDescription: '',
+      notificationDescription: { text: '' },
+      additionalInfo: [{ text: '' }],
       notifyUsersIDs: [],
     };
     this.notificationService.sendNotification(notification);

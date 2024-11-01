@@ -3,7 +3,10 @@ import { NoteWebhookBodyDto } from '@src/gitlab-webhook/dto/note/noteWebhookBody
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
 import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { NotificationService } from '@src/notification-service/notification-service';
-import { GeneralNotificationType } from '@src/notification-service/notification-strategy';
+import {
+  GeneralNotificationType,
+  TextWithURL,
+} from '@src/notification-service/notification-strategy';
 import { UtilsService } from '@src/utils/utils.service';
 
 @Injectable()
@@ -43,20 +46,28 @@ export class NoteService {
     // TODO: перенести в discord notification strategy
     const beautifyNote = objectAttributes.note.trim().replaceAll('```', '`');
 
-    const embedTitle = `${user.irlName} написал${user.female ? 'а' : ''} коммент к МРу`;
+    const notificationTitle: TextWithURL = {
+      text: `${user.irlName} написал${user.female ? 'а' : ''} коммент к МРу`,
+      url: objectAttributes.url,
+    };
 
-    let embedDescription = this.gitlabUtils.addMergeRequestInfo(mergeRequest);
-    embedDescription += `\n${beautifyNote}\n`;
-
-    embedDescription += this.gitlabUtils.addDefaultFooter({
-      repo: mergeRequest.target.name,
-    });
+    const additionalInfo: TextWithURL[] = [];
+    additionalInfo.push(
+      this.gitlabUtils.addMergeRequestTextAndLink(mergeRequest),
+      {
+        text: `\n${beautifyNote}\n`,
+      },
+      {
+        text: this.gitlabUtils.addDefaultFooter({
+          repo: mergeRequest.target.name,
+        }),
+      },
+    );
 
     const notification: GeneralNotificationType = {
       notificationTitle: `МР!`,
-      notificationSubject: embedTitle,
-      notificationDescription: embedDescription,
-      notificationUrl: objectAttributes.url,
+      notificationDescription: notificationTitle,
+      additionalInfo: additionalInfo,
       notifyUsersIDs,
     };
     this.notificationService.sendNotification(notification);

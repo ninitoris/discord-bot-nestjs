@@ -27,23 +27,26 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
   );
 
   async sendNotification(options: TelegramMessageType) {
-    console.log(options);
-
     const {
       notificationTitle,
-      notificationSubject,
       notificationDescription,
+      additionalInfo,
       notifyUsersIDs,
-      notificationUrl,
     } = options;
 
+    const escapedTitle = this.utils.escapeMarkdown(notificationTitle);
     const { tags, usersTelegramIDs } =
       this.getTelegramTagsByUserIDs(notifyUsersIDs);
 
-    let messageBodyWithTags = '';
-    messageBodyWithTags += `**${this.utils.escapeMarkdown(notificationTitle)} ${tags}**\n`;
-    messageBodyWithTags += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
-    messageBodyWithTags += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
+    let messageBody = '';
+    messageBody += this.utils.getMarkdownTextWithUrl(
+      notificationDescription,
+      true,
+    );
+    messageBody += '\n\n';
+    messageBody += this.utils.getMarkdownTextWithUrl(additionalInfo, true);
+
+    const messageWithTags = `${escapedTitle} ${tags}\n${messageBody}`;
 
     const extra: ExtraReplyMessage = {
       parse_mode: 'MarkdownV2',
@@ -60,17 +63,10 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
       extra.message_thread_id = messageThreadId; // для суперчата
     }
 
-    await this.bot.telegram.sendMessage(
-      this.chatId,
-      messageBodyWithTags,
-      extra,
-    );
+    await this.bot.telegram.sendMessage(this.chatId, messageWithTags, extra);
 
     if (usersTelegramIDs.length) {
-      let messageBodyNoTags = '';
-      messageBodyNoTags += `**${this.utils.escapeMarkdown(notificationTitle)}**\n`;
-      messageBodyNoTags += `**[${this.utils.escapeMarkdown(notificationSubject)}](${notificationUrl})**\n`;
-      messageBodyNoTags += `\n${this.utils.escapeMarkdown(notificationDescription)}`;
+      const messageWithoutTags = `${escapedTitle} \n${messageBody}`;
 
       if (messageThreadId) {
         delete extra.message_thread_id;
@@ -79,7 +75,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
       for (const usersTelegramID of usersTelegramIDs) {
         await this.bot.telegram.sendMessage(
           usersTelegramID,
-          messageBodyNoTags,
+          messageWithoutTags,
           extra,
         );
       }

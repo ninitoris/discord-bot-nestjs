@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { GitLabApiService } from '@src/gitlab-api/gitlab-api.service';
 import { MergeRequestAttributesDto } from '@src/gitlab-webhook/dto/mergeRequest/mergeRequestAttributes.dto';
 import { IApprovalsInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
+import { TextWithURL } from '@src/notification-service/notification-strategy';
 import { UtilsService } from '@src/utils/utils.service';
 
 @Injectable()
@@ -150,7 +151,23 @@ export class GitlabUtilityService {
   }
 
   /** Возвращает строку вида "!123: название МРа" с сылкой на сам МР */
-  public addMergeRequestInfo(objectAttributes: MergeRequestAttributesDto) {
-    return `[!${objectAttributes.iid}: ${objectAttributes.title}](${objectAttributes.url})\n`;
+  public addMergeRequestTextAndLink(
+    objectAttributes: MergeRequestAttributesDto,
+  ): TextWithURL {
+    return {
+      text: `!${objectAttributes.iid}: ${objectAttributes.title}`,
+      url: `${objectAttributes.url}`,
+    };
+  }
+
+  /** Возвращает строку вида "!123: название МРа" */
+  public getMergeRequestIdAndTitle(
+    objectAttributes: MergeRequestAttributesDto,
+  ): string {
+    return `!${objectAttributes.iid}: ${objectAttributes.title}`;
+  }
+
+  public getMergeRequestUrl(objectAttributes: MergeRequestAttributesDto) {
+    return `${objectAttributes.url}`;
   }
 }
