@@ -37,6 +37,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     const escapedTitle = this.utils.escapeMarkdown(notificationTitle);
     const { tags, usersTelegramIDs } =
       this.getTelegramTagsByUserIDs(notifyUsersIDs);
+    const escapeTags = this.utils.escapeMarkdown(tags);
 
     let messageBody = '';
     messageBody += this.utils.getMarkdownTextWithUrl(
@@ -46,7 +47,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     messageBody += '\n\n';
     messageBody += this.utils.getMarkdownTextWithUrl(additionalInfo, true);
 
-    const messageWithTags = `${escapedTitle} ${tags}\n${messageBody}`;
+    const messageWithTags = `${escapedTitle} ${escapeTags}\n${messageBody}`;
 
     const extra: ExtraReplyMessage = {
       parse_mode: 'MarkdownV2',
