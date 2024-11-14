@@ -100,6 +100,7 @@ export class GitLabUserService {
     },
     kulikov: {
       gitlabId: 184,
+      telegramUsername: 'kulikrch',
       discordId: '528154123749687297',
       irlName: 'Алексей Куликов',
     },
