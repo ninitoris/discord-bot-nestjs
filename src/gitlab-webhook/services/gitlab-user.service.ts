@@ -38,6 +38,7 @@ export class GitLabUserService {
     DOrehov: {
       gitlabId: 113,
       discordId: '184691263684083712',
+      telegramUsername: 'tylys',
       irlName: 'Данила Орехов',
     },
     ARomanov: {
