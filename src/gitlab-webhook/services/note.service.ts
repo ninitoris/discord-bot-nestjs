@@ -26,7 +26,7 @@ export class NoteService {
     const mergeRequest = body.merge_request;
 
     const gitlabUser = body.user;
-    const user = this.gitlabUserService.getUserById(gitlabUser.id);
+    const user = await this.gitlabUserService.getUserById(gitlabUser.id);
 
     let notifyUsersIDs;
     if (note.includes('@')) {

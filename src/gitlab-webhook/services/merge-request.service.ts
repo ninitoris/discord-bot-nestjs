@@ -107,7 +107,7 @@ export class MergeRequestService {
     }
 
     const authorId = objectAttributes.author_id;
-    const user = this.gitlabUserService.getUserById(authorId);
+    const user = await this.gitlabUserService.getUserById(authorId);
     const notificationDescription: TextWithURL = {
       text: `${user.irlName} открыл${user.female ? 'а' : ''} МР`,
       url: objectAttributes.url,
@@ -116,11 +116,11 @@ export class MergeRequestService {
     const additionalInfo: TextWithURL[] = [];
     if (nextReviewer) {
       additionalInfo.push({
-        text: `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`,
+        text: `Ревьюер: ${await this.gitlabUserService.getUserNameById(nextReviewer)}\n`,
       });
     } else {
       additionalInfo.push({
-        text: `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`,
+        text: `Ассайни: ${await this.gitlabUserService.getUserNameById(assignee)}\n`,
       });
     }
 
@@ -170,9 +170,9 @@ export class MergeRequestService {
 
     if (!nextReviewer) return;
 
-    const user = this.gitlabUserService.getUserById(gitlabUser.id);
+    const user = await this.gitlabUserService.getUserById(gitlabUser.id);
     const nextReviewerUserName =
-      this.gitlabUserService.getUserNameById(nextReviewer);
+      await this.gitlabUserService.getUserNameById(nextReviewer);
     const notificationDescription: TextWithURL = {
       text: `${user.irlName} апрувнул${user.female ? 'а' : ''} МР`,
       url: objectAttributes.url,
@@ -230,9 +230,9 @@ export class MergeRequestService {
 
     // проверить, что этот ревьюер еще не аппрувнул
     if (checkNewReviewer) {
-      const user = this.gitlabUserService.getUserById(gitlabUser.id);
+      const user = await this.gitlabUserService.getUserById(gitlabUser.id);
       const newReviewerUserName =
-        this.gitlabUserService.getUserNameById(checkNewReviewer);
+        await this.gitlabUserService.getUserNameById(checkNewReviewer);
 
       const notificationDescription: TextWithURL = {
         text: `${user.irlName} изменил${user.female ? 'а' : ''} ревьюера`,
@@ -272,10 +272,10 @@ export class MergeRequestService {
   ) {
     const newAssignee: GitlabUserDto = changes.assignees.current[0];
     const newAssigneeId = newAssignee.id;
-    const user = this.gitlabUserService.getUserById(gitlabUser.id);
+    const user = await this.gitlabUserService.getUserById(gitlabUser.id);
 
     const newAssigneeUserName =
-      this.gitlabUserService.getUserNameById(newAssigneeId);
+      await this.gitlabUserService.getUserNameById(newAssigneeId);
 
     const notificationDescription: TextWithURL = {
       text: `${user.irlName} изменил${user.female ? 'а' : ''} ассайни`,
@@ -335,7 +335,7 @@ export class MergeRequestService {
       return;
     }
 
-    const user = this.gitlabUserService.getUserById(gitlabUser.id);
+    const user = await this.gitlabUserService.getUserById(gitlabUser.id);
     const notificationDescription: TextWithURL = {
       text: `${user.irlName} пометил${user.female ? 'а' : ''} МР как готовый`,
       url: objectAttributes.url,
@@ -344,11 +344,11 @@ export class MergeRequestService {
     const additionalInfo: TextWithURL[] = [];
     if (nextReviewer) {
       additionalInfo.push({
-        text: `Ревьюер: ${this.gitlabUserService.getUserNameById(nextReviewer)}\n`,
+        text: `Ревьюер: ${await this.gitlabUserService.getUserNameById(nextReviewer)}\n`,
       });
     } else {
       additionalInfo.push({
-        text: `Ассайни: ${this.gitlabUserService.getUserNameById(assignee)}\n`,
+        text: `Ассайни: ${await this.gitlabUserService.getUserNameById(assignee)}\n`,
       });
     }
     additionalInfo.push(

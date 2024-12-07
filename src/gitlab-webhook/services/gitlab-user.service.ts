@@ -1,6 +1,7 @@
 // TODO: тут должна быть бд через orm-ку, но пока что да
 
 import { Injectable } from '@nestjs/common';
+import { GitLabApiService } from '@src/gitlab-api/gitlab-api.service';
 
 type UserType = {
   /** ID пользоателя в гитлабе */
@@ -20,7 +21,7 @@ type UserType = {
 export class GitLabUserService {
   public gitlabUsersMap: Map<number, UserType> = new Map();
 
-  constructor() {
+  constructor(private readonly gitlabApiService: GitLabApiService) {
     Object.values(this.usersMap).forEach((user) => {
       this.gitlabUsersMap.set(user.gitlabId, user);
     });
@@ -263,14 +264,36 @@ export class GitLabUserService {
   }
 
   /** Возвращает либо имя пользователя по его ID, либо заглушку "Кто-то" */
-  getUserNameById(userId: number): string | 'Кто-то' {
-    return this.gitlabUsersMap.get(userId)?.irlName || 'Кто-то';
+  async getUserNameById(userId: number): Promise<string | 'Кто-то'> {
+    const userName = this.gitlabUsersMap.get(userId)?.irlName;
+    if (userName) return userName;
+
+    const gitlabUserInfo = await this.gitlabApiService.getUserInfo(userId);
+    const gitlabUserName = gitlabUserInfo.name;
+    if (gitlabUserName) return gitlabUserName;
+
+    return 'Кто-то';
   }
 
   /** Возвращает либо пользователя GitLab по указанному ID, либо пользователя-заглушку */
-  getUserById(userId: number): UserType {
-    return this.gitlabUsersMap.get(userId) || this.dummyUser;
-    // Пользователь-заглушка используется для того, чтобы приложение не падало при отсутствии реального пользователя, например, когда новый сотрудник еще не был добавлен в базу
+  async getUserById(userId: number): Promise<UserType> {
+    const user = this.gitlabUsersMap.get(userId);
+    if (user) {
+      return user;
+    }
+
+    const gitlabUserInfo = await this.gitlabApiService.getUserInfo(userId);
+    if (!gitlabUserInfo) {
+      // Пользователь-заглушка используется для того, чтобы приложение не падало при отсутствии реального пользователя, например, когда новый сотрудник еще не был добавлен в базу
+      return this.dummyUser;
+    }
+
+    const createUser: UserType = {
+      gitlabId: gitlabUserInfo.id,
+      irlName: gitlabUserInfo.name,
+    };
+
+    return createUser;
   }
 
   isFemale(userId: number): boolean {

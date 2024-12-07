@@ -17,7 +17,7 @@ interface TelegramMessageType extends GeneralNotificationType {}
 export class TelegramNotificationStrategy implements NotificationStrategy {
   constructor(
     @InjectBot() private readonly bot: Telegraf,
-    private readonly gitLabUserService: GitLabUserService,
+    private readonly gitlabUserService: GitLabUserService,
     private readonly utils: UtilsService,
     private readonly configService: ConfigService,
   ) {}
@@ -36,7 +36,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
 
     const escapedTitle = this.utils.escapeMarkdown(notificationTitle);
     const { tags, usersTelegramIDs } =
-      this.getTelegramTagsByUserIDs(notifyUsersIDs);
+      await this.getTelegramTagsByUserIDs(notifyUsersIDs);
     const escapeTags = this.utils.escapeMarkdown(tags);
 
     let messageBody = '';
@@ -83,15 +83,17 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     }
   }
 
-  private getTelegramTagsByUserIDs(notifyUsersIDs: Array<number>): {
+  private async getTelegramTagsByUserIDs(
+    notifyUsersIDs: Array<number>,
+  ): Promise<{
     tags: string;
     usersTelegramIDs: Array<number>;
-  } {
+  }> {
     const tags: Array<string> = [];
     const usersTelegramIDs: Array<number> = [];
     for (const userId of notifyUsersIDs) {
       const { tag, usersTelegramID } =
-        this.getTelegramNameAndIdByUserId(userId);
+        await this.getTelegramNameAndIdByUserId(userId);
       if (tag) tags.push(tag);
       if (usersTelegramID) usersTelegramIDs.push(usersTelegramID);
     }
@@ -101,14 +103,16 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     };
   }
 
-  private getTelegramNameAndIdByUserId(userId: number): {
+  private async getTelegramNameAndIdByUserId(userId: number): Promise<{
     tag?: string;
     usersTelegramID?: number;
-  } {
-    const user = this.gitLabUserService.getUserById(userId);
+  }> {
+    const user = await this.gitlabUserService.getUserById(userId);
     if (!user) return;
 
-    const tag = '@' + (user.telegramUsername || user.irlName);
+    const tag = user.telegramUsername
+      ? '@' + user.telegramUsername
+      : '@ ' + user.irlName;
     const usersTelegramID = user.telegramID;
 
     return {
