@@ -54,20 +54,51 @@ export class GitLabApiService {
   }
 
   // Получение информации о пользователе в гитлабе по его username из url
-  async getUserInfo(username: string): Promise<UserInfo | undefined> {
-    try {
-      const response = await this.axios.get(`/users?username=${username}`);
+  async getUserInfo(username: string): Promise<UserInfo | undefined>;
+  async getUserInfo(userId: number): Promise<UserInfo | undefined>;
+  async getUserInfo(
+    userNameOrID: string | number,
+  ): Promise<UserInfo | undefined> {
+    if (typeof userNameOrID === 'string') {
+      try {
+        const username = userNameOrID;
+        const response = await this.axios.get(`/users?username=${username}`);
 
-      if (response && Array.isArray(response.data) && response.data.length > 0)
-        return response.data[0];
-      return undefined;
-    } catch (error) {
-      this.logger.error(
-        `Error fetching user info for username: ${username}`,
-        error.stack,
-      );
+        if (
+          response &&
+          Array.isArray(response.data) &&
+          response.data.length > 0
+        ) {
+          return response.data[0];
+        }
 
-      return undefined;
+        return undefined;
+      } catch (error) {
+        this.logger.error(
+          `Error fetching user info for username: ${userNameOrID}`,
+          error.stack,
+        );
+
+        return undefined;
+      }
+    } else if (typeof userNameOrID === 'number') {
+      try {
+        const userID = userNameOrID;
+        const response = await this.axios.get(`/users/${userID}`);
+
+        if (response?.data) {
+          return response.data;
+        }
+
+        return undefined;
+      } catch (error) {
+        this.logger.error(
+          `Error fetching user info for userID: ${userNameOrID}`,
+          error.stack,
+        );
+
+        return undefined;
+      }
     }
   }
 }
