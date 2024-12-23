@@ -84,6 +84,7 @@ export class GitLabUserService {
       gitlabId: 165,
       discordId: '287265168336093184',
       irlName: 'Вадим Бухтияров',
+      telegramUsername: 'heiwa_local',
     },
     zolotarev: {
       gitlabId: 166,
