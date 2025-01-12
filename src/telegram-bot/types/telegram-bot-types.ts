@@ -5,6 +5,14 @@ import Chat from 'telegraf/typings/types';
 import { UserInfo } from '../../gitlab-webhook/gitlab-webhook.types';
 import * as tg from 'telegraf/types';
 
+import { Message } from 'telegraf/typings/core/types/typegram';
+
+export function isTextMessage(
+  message: Message,
+): message is Message.TextMessage {
+  return 'text' in message;
+}
+
 export interface CustomContext extends Context {
   update: Update;
 }
@@ -26,15 +34,16 @@ export interface CustomWizardContext extends Scenes.WizardContext {
 }
 
 export interface RegisterData {
-  gitlabName: string;
   name: string;
+  female?: boolean;
+  orgID?: string;
+  gitlabName: string;
+  gitlabID: number;
+  discordName?: string;
   telegramID?: number;
   telegramUsername?: string;
-  orgID?: string;
-  discordName?: string;
-  female?: boolean;
-  userInfo?: UserInfo;
   createdBy?: string;
+  gitlabUserInfo?: UserInfo;
 }
 
 export interface RegisterWizardContext extends Scenes.WizardContext {

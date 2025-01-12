@@ -5,9 +5,13 @@ import { UserService } from './user.service';
 import { GitLabApiModule } from '../gitlab-api/gitlab-api.module';
 import { UserController } from './user.controller';
 import { UserSettings } from './entities/usersettings.entity';
+import { RegistrationRequest } from './entities/registration-request.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Users, UserSettings]), GitLabApiModule],
+  imports: [
+    TypeOrmModule.forFeature([Users, UserSettings, RegistrationRequest]),
+    GitLabApiModule,
+  ],
   providers: [UserService],
   exports: [UserService],
   controllers: [UserController],

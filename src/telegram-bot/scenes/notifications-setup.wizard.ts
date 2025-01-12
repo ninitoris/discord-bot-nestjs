@@ -10,10 +10,8 @@ import {
 import { Markup, Scenes } from 'telegraf';
 import { MessageManager } from '@src/telegram-bot/message-manager/message-manager';
 import { CustomWizardContext } from '@src/telegram-bot/types/telegram-bot-types';
-import {
-  StartMenuMarkup,
-  StartMenuText,
-} from '@src/telegram-bot/telegram-bot.constants';
+import { StartMenuText } from '@src/telegram-bot/telegram-bot.menu';
+import { TelegramBotUtils } from '../utils/telegram-bot.utils';
 
 enum Steps {
   groupChatNotify = 0,
@@ -29,6 +27,7 @@ export class NotificationsSetupWizard {
   constructor(
     private readonly utilsService: UtilsService,
     private readonly mm: MessageManager,
+    private readonly telegramBotUtils: TelegramBotUtils,
   ) {}
 
   @WizardStep(Steps.groupChatNotify)
@@ -233,18 +232,27 @@ export class NotificationsSetupWizard {
     // TODO: установить время пользователя в бд типо
 
     ctx.scene.leave();
-    await this.mm.msg(ctx, StartMenuText, StartMenuMarkup);
+    const startMenu = await this.telegramBotUtils.getStartMenu(
+      ctx.callbackQuery.from.id,
+    );
+    await this.mm.msg(ctx, StartMenuText, startMenu);
   }
 
   @Action('cancel') // это экшен, который висит на кнопке "отмена"
   protected async exit(@Context() ctx: CustomWizardContext) {
-    await this.mm.msg(ctx, StartMenuText, StartMenuMarkup);
+    const startMenu = await this.telegramBotUtils.getStartMenu(
+      ctx.callbackQuery.from.id,
+    );
+    await this.mm.msg(ctx, StartMenuText, startMenu);
     await ctx.scene.leave();
   }
 
   @Command('exit')
   protected async exitCommand(@Context() ctx: CustomWizardContext) {
-    await this.mm.sendNewMessage(ctx, StartMenuText, StartMenuMarkup);
+    const startMenu = await this.telegramBotUtils.getStartMenu(
+      ctx.callbackQuery.from.id,
+    );
+    await this.mm.sendNewMessage(ctx, StartMenuText, startMenu);
     await this.mm.userSentSomething(ctx);
     await this.mm.cleanUpChat(ctx.chat.id);
     await ctx.scene.leave();

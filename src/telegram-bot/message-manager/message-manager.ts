@@ -3,7 +3,9 @@ import { Context, Telegraf } from 'telegraf';
 import * as tg from 'telegraf/types';
 import { InjectBot } from 'nestjs-telegraf';
 import { Injectable, Logger } from '@nestjs/common';
-import { CustomContext } from '@src/telegram-bot/types/telegram-bot-types';
+import { isTextMessage } from '@src/telegram-bot/types/telegram-bot-types';
+import { TgBotMessages } from '@src/telegram-bot/entities/tg-bot-messages.entity';
+import { FmtString } from 'telegraf/typings/format';
 
 @Injectable()
 export class MessageManager {
@@ -20,20 +22,24 @@ export class MessageManager {
   }
 
   async cleanUpUserMessages(chatID: number) {
-    const userMessages = await this.store.getUserMessages(chatID);
+    const userMessages = await this.store.getUserMessagesIDs(chatID);
+    console.log('cleanUpUserMessages');
+    console.log(userMessages);
     if (userMessages.length) {
-      await this.bot.telegram.deleteMessages(chatID, userMessages);
-      await this.store.setUserMessages(chatID, []);
+      const messagesIDs = userMessages.map((msg) => msg.messageID);
+      await this.bot.telegram.deleteMessages(chatID, messagesIDs);
+      await this.store.deleteMessagesByIDs(messagesIDs);
     }
   }
 
   async cleanUpBotMessages(chatID: number) {
-    const botMessages = await this.store.getBotMessages(chatID);
+    const botMessages = await this.store.getBotMessagesIDs(chatID);
     if (botMessages.length > 1) {
-      const lastBotMessage = botMessages[botMessages.length - 1];
-      const messagesToDelete = botMessages.slice(0, -1);
+      const messagesIDs = botMessages.map((msg) => msg.messageID);
+      // const lastBotMessage = messagesIDs[messagesIDs.length - 1];
+      const messagesToDelete = messagesIDs.slice(0, -1);
+      await this.store.deleteMessagesByIDs(messagesToDelete);
       await this.bot.telegram.deleteMessages(chatID, messagesToDelete);
-      await this.store.setBotMessages(chatID, [lastBotMessage]);
     }
   }
 
@@ -42,7 +48,7 @@ export class MessageManager {
     text: string,
     extra: tg.Convenience.ExtraEditMessageText,
   ): undefined | Promise<tg.Update.Edited & tg.Message.TextMessage> {
-    const lastBotMessage = await this.store.getLastBotMessage(chatId);
+    const lastBotMessage = await this.store.getLastBotMessageID(chatId);
     if (!lastBotMessage) {
       return undefined;
     }
@@ -97,36 +103,108 @@ export class MessageManager {
   }
 
   async sendNewMessage(
+    chatId: number,
+    text: string,
+    extra?:
+      | tg.Convenience.ExtraReplyMessage
+      | tg.Convenience.ExtraEditMessageText,
+  ): Promise<
+    tg.Convenience.ExtraReplyMessage | tg.Convenience.ExtraEditMessageText
+  >;
+  async sendNewMessage(
     ctx: Context,
     text: string,
     extra?:
       | tg.Convenience.ExtraReplyMessage
       | tg.Convenience.ExtraEditMessageText,
+  ): Promise<
+    tg.Convenience.ExtraReplyMessage | tg.Convenience.ExtraEditMessageText
+  >;
+  async sendNewMessage(
+    chatIdOrCtx: number | Context,
+    text: string,
+    extra?:
+      | tg.Convenience.ExtraReplyMessage
+      | tg.Convenience.ExtraEditMessageText,
   ) {
-    const chatID = ctx.chat.id;
-    const message = await ctx.sendMessage(text, extra);
-    const messageId = message.message_id;
-    await this.store.appendBotMessage(chatID, messageId);
+    let message: tg.Message.TextMessage;
+    let chatID;
+    console.log('typeof chatIdOrCtx');
+    console.log(typeof chatIdOrCtx);
+    if (typeof chatIdOrCtx === 'number' || typeof chatIdOrCtx === 'string') {
+      chatID = chatIdOrCtx;
+      message = await this.sendMsgInChat(chatID, text, extra);
+    } else {
+      chatID = chatIdOrCtx.chat.id;
+      message = await chatIdOrCtx.sendMessage(text, extra);
+    }
+    // const messageId = message.message_id;
+
+    const tgBotMessage = new TgBotMessages();
+    tgBotMessage.userID = message.from.id;
+    tgBotMessage.chatID = chatID;
+    tgBotMessage.messageType = 'bot';
+    tgBotMessage.messageText = text;
+    tgBotMessage.messageID = message.message_id;
+    tgBotMessage.timestamp = new Date(message.date * 1000);
+    tgBotMessage.status = 'NEW';
+
+    await this.store.saveMessage(tgBotMessage);
 
     return message;
   }
 
-  async userSentSomething(ctx: CustomContext) {
+  async userSentSomething(ctx: Context) {
+    console.log('user sent smth!');
     if (
       'callback_query' in ctx.update &&
       'message' in ctx.update.callback_query
     ) {
-      const msgId = ctx.update.callback_query.message.message_id;
-      const chatId = ctx.update.callback_query.message.chat.id;
-      await this.store.appendUserMessage(chatId, msgId);
+      console.log('case 1');
+      console.dir(ctx, { depth: Infinity });
+      const chatID = ctx.update.callback_query.message.chat.id;
+      const tgBotMessage = new TgBotMessages();
+      tgBotMessage.userID = ctx.from.id;
+      tgBotMessage.chatID = chatID;
+      tgBotMessage.messageType = 'user';
+      tgBotMessage.messageID = ctx.update.callback_query.message.message_id;
+      // if (isTextMessage(ctx.update.callback_query.message)) {
+      //   tgBotMessage.messageText = ctx.update.callback_query.message.text;
+      // }
+      tgBotMessage.timestamp = new Date(ctx.message.date * 1000);
+      tgBotMessage.status = 'NEW';
+      await this.store.saveMessage(tgBotMessage);
     } else if ('message' in ctx.update) {
-      const msgId = ctx.update.message.message_id;
-      const chatId = ctx.update.message.chat.id;
-      await this.store.appendUserMessage(chatId, msgId);
+      console.log('case 2');
+      console.dir(ctx, { depth: Infinity });
+      const chatID = ctx.update.message.chat.id;
+
+      const tgBotMessage = new TgBotMessages();
+      tgBotMessage.userID = ctx.from.id;
+      tgBotMessage.chatID = chatID;
+      tgBotMessage.messageID = ctx.update.message.message_id;
+      tgBotMessage.messageType = 'user';
+      if (isTextMessage(ctx.update.message)) {
+        tgBotMessage.messageText = ctx.update.message.text;
+      }
+      tgBotMessage.timestamp = new Date(ctx.message.date * 1000);
+      tgBotMessage.status = 'NEW';
+      await this.store.saveMessage(tgBotMessage);
     } else if ('message' in ctx) {
-      const msgId = ctx.message.message_id;
-      const chatId = ctx.chat.id;
-      await this.store.appendUserMessage(chatId, msgId);
+      console.log('case 3');
+      console.dir(ctx, { depth: Infinity });
+
+      const tgBotMessage = new TgBotMessages();
+      tgBotMessage.userID = ctx.from.id;
+      tgBotMessage.chatID = ctx.chat.id;
+      tgBotMessage.messageType = 'user';
+      tgBotMessage.messageID = ctx.message.message_id;
+      if (isTextMessage(ctx.message)) {
+        tgBotMessage.messageText = ctx.message.text;
+      }
+      tgBotMessage.timestamp = new Date(ctx.message.date * 1000);
+      tgBotMessage.status = 'NEW';
+      await this.store.saveMessage(tgBotMessage);
     } else {
       Logger.error('Not found message in ctx');
       console.log(ctx);
@@ -151,7 +229,28 @@ export class MessageManager {
     extra?:
       | tg.Convenience.ExtraReplyMessage
       | tg.Convenience.ExtraEditMessageText,
+  ): Promise<tg.Message.TextMessage> {
+    return await this.bot.telegram.sendMessage(chatID, text, extra);
+  }
+
+  async editMessage(
+    chatId: number,
+    messageId: number,
+    text: string | FmtString,
+    extra?: tg.Convenience.ExtraEditMessageText,
   ) {
-    await this.bot.telegram.sendMessage(chatID, text, extra);
+    const message = await this.bot.telegram.editMessageText(
+      chatId,
+      messageId,
+      undefined,
+      text,
+      extra,
+    );
+    if (typeof message === 'boolean') {
+      Logger.error(`Failed to edit message ${messageId} in chat ${chatId}`);
+      return undefined;
+    } else {
+      return message;
+    }
   }
 }

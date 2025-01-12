@@ -15,16 +15,22 @@ import {
   RegisterWizardContext,
 } from '../types/telegram-bot-types';
 import { GitLabApiService } from '../../gitlab-api/gitlab-api.service';
-import { StartMenuMarkup, StartMenuText } from '../telegram-bot.constants';
+import { StartMenuText } from '../telegram-bot.menu';
 import { UtilsService } from '../../utils/utils.service';
 import { ConfigService } from '@nestjs/config';
+import { UserInfo } from '@src/gitlab-webhook/gitlab-webhook.types';
+import {
+  ExtraEditMessageText,
+  ExtraReplyMessage,
+} from 'telegraf/typings/telegram-types';
+import { TelegramBotUtils } from '../utils/telegram-bot.utils';
 
 enum Steps {
   greeting = 0, // Приветственное сообщение
   inputLink = 1, // Пользователь вводит ссылку на гитлаб
   selectName = 2, // Подтверждение правильности имени
   editName = 3, // Если нужно изменить имя (необязательно)
-  selectOrganization = 4, // Выбор организациипо кнопке (ипк, клик)
+  selectOrganization = 4, // Выбор организациипо кнопке (ипк, клик, ади)
   selectDiscord = 5, // Ввести или нет дискорд (необязательно)
   inputDiscord = 6, // Ввод юзернейма дисокрда
   selectSex = 7, // Выбор пола
@@ -39,6 +45,7 @@ export class RegisterWizard {
     private readonly userService: UserService,
     private readonly utilsService: UtilsService,
     private readonly configService: ConfigService,
+    private readonly telegramBotUtils: TelegramBotUtils,
     @InjectBot() private readonly bot: Telegraf,
   ) {}
 
@@ -78,35 +85,39 @@ export class RegisterWizard {
     const userInput = ctx.update.message.text;
     const username = getUsername(userInput);
     if (!username) {
-      await this.mm.msg(
+      await this.mm.sendNewMessage(
         ctx,
         `🫠 Неправильная ссылка, попробуйте снова`,
         this.goBackButton,
       );
+      this.mm.cleanUpChat(ctx.chat.id);
       ctx.wizard.selectStep(Steps.inputLink);
       return;
     }
 
-    const userInfo = await this.gitlabApi.getUserInfo(username);
-    if (!userInfo) {
-      await this.mm.msg(
+    const gitlabUserInfo: UserInfo = await this.gitlabApi.getUserInfo(username);
+    if (!gitlabUserInfo) {
+      await this.mm.sendNewMessage(
         ctx,
         `🫠 Пользователя не существует, попробуйте снова`,
         this.goBackButton,
       );
+      this.mm.cleanUpChat(ctx.chat.id);
       ctx.wizard.selectStep(Steps.inputLink);
       return;
     }
-    if (userInfo.username) {
-      ctx.session.userInfo = userInfo;
-      ctx.wizard.selectStep(Steps.selectName);
-      await this.selectName(ctx);
-    }
+
+    // TODO: добавить проверку, что нет заявки на регисрацию этого пользователя
+
+    ctx.session.gitlabUserInfo = gitlabUserInfo;
+    ctx.session.telegramUsername = ctx.update.message.from.username;
+    ctx.wizard.selectStep(Steps.selectName);
+    await this.selectName(ctx);
   }
 
   @WizardStep(Steps.selectName)
   protected async selectName(@Context() ctx: RegisterWizardContext) {
-    const name = ctx.session.name ?? ctx.session.userInfo.name;
+    const name = ctx.session.name ?? ctx.session.gitlabUserInfo.name;
     const validName = validateAndFormatName(name);
     if (!validName) {
       const msgText = `👤 Ваше имя и фамилия должны быть на русском языке\n❌ ${name}`;
@@ -114,7 +125,9 @@ export class RegisterWizard {
         [Markup.button.callback('📝 Изменить имя', 'nameIsWrong')],
         this.backButton,
       ]);
-      return await this.mm.msg(ctx, msgText, msgButtons);
+      await this.mm.sendNewMessage(ctx, msgText, msgButtons);
+      this.mm.cleanUpChat(ctx.chat.id);
+      return;
     }
     const msgText = `👤 Имя и фамилия верные?\n${name}`;
 
@@ -127,10 +140,13 @@ export class RegisterWizard {
     ]);
 
     await this.mm.msg(ctx, msgText, msgButtons);
+    this.mm.cleanUpChat(ctx.chat.id);
+    return;
   }
 
   @Action('nameIsRight')
   protected async nameIsRight(@Context() ctx: RegisterWizardContext) {
+    ctx.session.name = ctx.session.gitlabUserInfo.name;
     ctx.wizard.selectStep(Steps.selectOrganization);
     await this.selectOrganization(ctx);
   }
@@ -139,7 +155,7 @@ export class RegisterWizard {
   protected async nameIsWrong(@Context() ctx: RegisterWizardContext) {
     await this.mm.msg(
       ctx,
-      '👀 Введите новое имя в форме Имя Фамилия',
+      '👀 Введите новое имя в формате Имя Фамилия',
       this.goBackButton,
     );
 
@@ -213,6 +229,12 @@ export class RegisterWizard {
 
   @WizardStep(Steps.selectDiscord)
   protected async selectDiscord(@Context() ctx: RegisterWizardContext) {
+    // временно отключаем дискорд
+    // TODO: discord
+    ctx.wizard.selectStep(Steps.selectSex);
+    await this.selectSex(ctx);
+    return;
+
     const msgText = `🔔 Получать уведомления в дискорд?`;
 
     const msgButtons = Markup.inlineKeyboard([
@@ -236,7 +258,6 @@ export class RegisterWizard {
 
   @Action('dontUseDiscord')
   protected async dontUseDiscord(@Context() ctx: RegisterWizardContext) {
-    ctx.session.orgID = 'Клик';
     ctx.wizard.selectStep(Steps.selectSex);
     await this.selectSex(ctx);
   }
@@ -302,7 +323,8 @@ export class RegisterWizard {
   protected async confirmation(@Context() ctx: RegisterWizardContext) {
     const session = ctx.session;
 
-    const msgText = `👀 Проверьте данные перед отправкой\n🦊 Ссылка на аккаунт:\n${this.utilsService.escapeMarkdown(session.userInfo?.web_url)}\n\n👤 Имя:\n${session?.name}\n\n🏭 Организация:\n${session?.orgID}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${session.discordName ? `Да, на аккаунт ${this.utilsService.escapeMarkdown(session.discordName)}` : 'Нет'}`;
+    // TODO: discord
+    const msgText = `👀 Проверьте данные перед отправкой\n🦊 Ссылка на аккаунт:\n${this.utilsService.escapeMarkdown(session.gitlabUserInfo?.web_url)}\n\n👤 Имя:\n${session?.name}\n\n🏭 Организация:\n${session?.orgID}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде \\(временно недоступно\\):\n${session.discordName ? `Да, на аккаунт ${this.utilsService.escapeMarkdown(session.discordName)}` : 'Нет'}`;
 
     const msgButtons = Markup.inlineKeyboard([
       [
@@ -322,65 +344,52 @@ export class RegisterWizard {
   /**Подтвердить аккаунт и отправить его на проверку в другой чат*/
   @Action('confirm')
   protected async confirm(@Context() ctx: RegisterWizardContext) {
-    // Переменна чата админов
-    const chatId = this.configService.get<number>('CHAT_ID');
     const session = ctx.session;
-    const messageText = `👀 Пользователь хочет зарегистрироваться\n🦊 Ссылка на аккаунт:\n${session.userInfo.web_url}\n\n👤 Имя:\n${session?.name}\n\n🏭 Организация:\n${session?.orgID}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${session.discordName ? `Да, на аккаунт ${session.discordName}` : 'Нет'}`;
-    const msgButtons = Markup.inlineKeyboard([
-      [
-        Markup.button.callback('✅ Подтвердить аккаунт', 'approve'),
-        Markup.button.callback('❌ Отклонить', 'reject'),
-      ],
-    ]);
 
-    await this.mm.msg(ctx, '✅ Аккаунт отправлен на проверку', StartMenuMarkup);
+    const startMenu = await this.telegramBotUtils.getStartMenu(
+      ctx.callbackQuery.from.id,
+    );
+    await this.mm.msg(ctx, '✅ Аккаунт отправлен на проверку', startMenu);
     await ctx.scene.leave();
 
     const registerData: RegisterData = {
-      gitlabName: session.userInfo.username,
+      gitlabName: session.gitlabUserInfo.username,
+      gitlabID: session.gitlabUserInfo.id,
       name: session.name,
       telegramID: ctx.chat.id ?? null,
       telegramUsername: ctx.chat.username ?? null,
       orgID: session.orgID ?? null,
       discordName: session.discordName ?? null,
       female: session.female ?? false,
-      userInfo: session.userInfo,
+      gitlabUserInfo: session.gitlabUserInfo,
       createdBy: ctx.chat.username,
     };
 
+    const registrationRequest =
+      await this.userService.createRegistrationRequest(registerData);
+    const messageText = `👀 Пользователь хочет зарегистрироваться\n\n🦊 Ссылка на аккаунт:\n${session.gitlabUserInfo.web_url}\n\n👤 Имя:\n${session?.name}\n\n📱 Телега:\n@${session.telegramUsername}\n\n🎪 Организация:\n${session?.orgID}\n\n🫵 Пол:\n${session.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${session.discordName ? `Да, на аккаунт ${session.discordName}` : 'Нет'}`;
+
     // Отправка сообщения в другой чат
-    await this.mm.sendMsgInChat(chatId, messageText, msgButtons);
+    // Переменная чата админов
+    const chatId = this.configService.get<number>('CHAT_ID');
 
-    // Регистрируем экшены внешнего чата
-    this.bot.action('approve', async (ctx: ChatContext) => {
-      if (ctx.from.username) {
-        registerData.createdBy = ctx.from.username;
-      }
+    const msgButtons = Markup.inlineKeyboard([
+      [
+        Markup.button.callback('✅ Подтвердить аккаунт', 'approveUser'),
+        Markup.button.callback('❌ Отклонить', 'rejectUser'),
+      ],
+    ]);
+    const extra: ExtraReplyMessage | ExtraEditMessageText = {
+      link_preview_options: {
+        is_disabled: true, // выключил превью ссылок, потому что ссылки на gitlab.interprocom.ru у нас выглядят не очень красиво
+      },
+      reply_markup: msgButtons.reply_markup,
+    };
 
-      const newUser = await this.userService.createUser(registerData);
-      if (!newUser) {
-        return await this.mm.msg(ctx, '💀 Произошла непредвиденная ошибка');
-      }
-
-      // Уведомляем пользователя, что он прошел регистрацию
-      await this.mm.sendMsgInChat(
-        registerData.telegramID,
-        '🎉 Вы успешно прошли регистрацию!',
-      );
-
-      clearRegisterData(registerData);
-      return await this.mm.msg(ctx, '🎉 Пользователь успешно зарегистрирован');
-    });
-
-    this.bot.action('reject', async (ctx) => {
-      await this.mm.sendMsgInChat(
-        registerData.telegramID,
-        '🙅‍♂️ Вам отклонено в регистрации',
-      );
-
-      clearRegisterData(registerData);
-      return await this.mm.msg(ctx, '🙅‍♂️ Пользователю отклонено в регистрации');
-    });
+    const msg = await this.mm.sendMsgInChat(chatId, messageText, extra);
+    const msgID = msg.message_id;
+    registrationRequest.messageID = msgID;
+    await this.userService.saveRegistrationRequest(registrationRequest);
   }
 
   /**Начать регистрацию сначала*/
@@ -396,7 +405,10 @@ export class RegisterWizard {
   protected async quit(@Context() ctx: RegisterWizardContext) {
     await ctx.scene.leave();
     clearContext(ctx);
-    await this.mm.msg(ctx, StartMenuText, StartMenuMarkup);
+    const startMenu = await this.telegramBotUtils.getStartMenu(
+      ctx.callbackQuery.from.id,
+    );
+    await this.mm.msg(ctx, StartMenuText, startMenu);
   }
 
   /**Удалить любые сообщения, если шаг равен шагу в котором юзер должен что-то ввести вызываем функцию шага*/
@@ -476,7 +488,7 @@ const clearContext = (ctx: RegisterWizardContext) => {
     'name',
     'telegramID',
     'telegramUsername',
-    'userInfo',
+    'gitlabUserInfo',
   ];
 
   sessionKeys.forEach((key) => {

@@ -12,6 +12,9 @@ import { session } from 'telegraf';
 import { RegisterWizard } from './scenes/register.wizard';
 import { GitLabApiModule } from '../gitlab-api/gitlab-api.module';
 import { UserModule } from '../user/user.module';
+import { TgBotMessages } from '@src/telegram-bot/entities/tg-bot-messages.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TelegramBotUtils } from './utils/telegram-bot.utils';
 
 @Module({
   imports: [
@@ -23,6 +26,7 @@ import { UserModule } from '../user/user.module';
         token: configService.get<string>('TELEGRAM_TOKEN'),
       }),
     }),
+    TypeOrmModule.forFeature([TgBotMessages]),
     GitLabApiModule,
     UserModule,
   ],
@@ -33,6 +37,7 @@ import { UserModule } from '../user/user.module';
     UtilsService,
     MessageStore,
     MessageManager,
+    TelegramBotUtils,
     RegisterWizard,
   ],
   exports: [],

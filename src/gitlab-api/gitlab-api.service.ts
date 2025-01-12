@@ -17,10 +17,14 @@ export class GitLabApiService {
     if (!token) {
       throw new Error('No GitLab token in env');
     }
-    const url = this.configService.get(ENVIRONMENT_KEY.GITLAB_API_URL);
-    if (!url) {
-      throw new Error('No GitLab API url in env');
+    const baseHost = this.configService.get(ENVIRONMENT_KEY.GITLAB_BASE_HOST);
+    const apiPostfix = this.configService.get(
+      ENVIRONMENT_KEY.GITLAB_API_POSTFIX,
+    );
+    if (!baseHost || !apiPostfix) {
+      throw new Error('No GitLab url or api postfix in env');
     }
+    const url = baseHost + apiPostfix;
     this.axios = axios.create({
       baseURL: url,
       headers: {
