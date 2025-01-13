@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
 import {
@@ -65,7 +65,13 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
       extra.message_thread_id = messageThreadId; // для суперчата
     }
 
-    await this.bot.telegram.sendMessage(this.chatId, messageWithTags, extra);
+    try {
+      await this.bot.telegram.sendMessage(this.chatId, messageWithTags, extra);
+    } catch (e) {
+      Logger.error('Caught error:');
+      console.log(e);
+      return;
+    }
 
     if (usersTelegramIDs.length) {
       const messageWithoutTags = `${escapedTitle} \n${messageBody}`;
