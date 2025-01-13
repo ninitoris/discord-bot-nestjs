@@ -12,6 +12,8 @@ import { MessageManager } from '@src/telegram-bot/message-manager/message-manage
 import { CustomWizardContext } from '@src/telegram-bot/types/telegram-bot-types';
 import { StartMenuText } from '@src/telegram-bot/telegram-bot.menu';
 import { TelegramBotUtils } from '../utils/telegram-bot.utils';
+import { UserService } from '@src/user/user.service';
+import { UserSettings } from '@src/user/entities/usersettings.entity';
 
 enum Steps {
   groupChatNotify = 0,
@@ -28,12 +30,13 @@ export class NotificationsSetupWizard {
     private readonly utilsService: UtilsService,
     private readonly mm: MessageManager,
     private readonly telegramBotUtils: TelegramBotUtils,
+    private readonly userService: UserService,
   ) {}
 
   @WizardStep(Steps.groupChatNotify)
   protected async groupChatNotify(@Context() ctx: Scenes.WizardContext) {
     const msgText =
-      'Выберите формат упоминаний вашего имени в групповом чате.\n\nУведомления будут приходить в чат в любом случае, но если вы включите упоминания в формате @username, то будете получать специальные уведомления.';
+      'Выберите формат упоминаний вашего имени в групповом чате.\n\nУведомления будут приходить в чат в любом случае, но если вы включите упоминания в формате @username, то будете получать системные уведомления.';
 
     const msgButtons = Markup.inlineKeyboard([
       [
@@ -77,14 +80,16 @@ export class NotificationsSetupWizard {
   protected async enableDuplicate(@Context() ctx: CustomWizardContext) {
     ctx.session.personalMessageNotifications = true;
 
-    await this.goToTimeConfiguration(ctx);
+    // await this.goToTimeConfiguration(ctx);
+    await this.setDefaultNotificationsTime(ctx);
   }
 
   @Action('disableDuplicate')
   protected async disableDuplicate(@Context() ctx: CustomWizardContext) {
     ctx.session.personalMessageNotifications = false;
 
-    await this.goToTimeConfiguration(ctx);
+    // await this.goToTimeConfiguration(ctx);
+    await this.setDefaultNotificationsTime(ctx);
   }
 
   @WizardStep(Steps.stepGoToTimeConfiguration)
@@ -95,7 +100,7 @@ export class NotificationsSetupWizard {
       await this.selectTimeStep(ctx);
     } else {
       ctx.wizard.selectStep(Steps.confirmation);
-      await this.confirmation(ctx);
+      await this.setDefaultNotificationsTime(ctx);
     }
   }
 
@@ -197,11 +202,12 @@ export class NotificationsSetupWizard {
     const {
       groupChatTagsEnabled,
       personalMessageNotifications,
-      notificationsTime,
+      // notificationsTime,
     } = ctx.session;
 
-    let confirmMessage = `Упоминания в чате: ${groupChatTagsEnabled ? 'включены' : 'выключены'}.\nУведомления в личные сообщения: ${personalMessageNotifications ? 'включены' : 'выключены'}\n\n`;
+    const confirmMessage = `Упоминания в чате: ${groupChatTagsEnabled ? 'включены' : 'выключены'}.\nУведомления в личные сообщения: ${personalMessageNotifications ? 'включены' : 'выключены'}\n\n`;
 
+    /*  TODO: допилить уведомления по времени
     if (groupChatTagsEnabled || personalMessageNotifications) {
       const pad = (num: number): string => {
         if (num >= 0 && num <= 9) return '0' + num;
@@ -212,6 +218,7 @@ export class NotificationsSetupWizard {
 
       confirmMessage += `Уведомления будут приходить с понедельника по пятницу с ${pad(startHour)}:${pad(startMinute)} до ${pad(endHour)}:${pad(endMinute)}`;
     }
+      */
 
     await this.mm.msg(
       ctx,
@@ -227,15 +234,31 @@ export class NotificationsSetupWizard {
 
   @Action('confirm')
   protected async confirm(@Context() ctx: CustomWizardContext) {
-    // TODO: включить или выключить тэги для этого пользователя
-    // TODO: включить или выключить личные уведомления в телеге для этого пользователя
-    // TODO: установить время пользователя в бд типо
-
     ctx.scene.leave();
     const startMenu = await this.telegramBotUtils.getStartMenu(
       ctx.callbackQuery.from.id,
     );
     await this.mm.msg(ctx, StartMenuText, startMenu);
+
+    const user = await this.userService.getUserByTgID(
+      ctx.callbackQuery.from.id,
+      { getNotificationSettings: true },
+    );
+
+    let userSettings;
+    if (user.userSettings) {
+      userSettings = user.userSettings;
+    } else {
+      userSettings = new UserSettings();
+      userSettings.user = user;
+    }
+
+    userSettings.useTelegram = true;
+    userSettings.tgGroupChatNotify = ctx.session.groupChatTagsEnabled ?? true;
+    userSettings.tgPrivateMessageNotify =
+      ctx.session.personalMessageNotifications ?? true;
+    userSettings.useDiscord = false;
+    await this.userService.saveUserSettings(userSettings);
   }
 
   @Action('cancel') // это экшен, который висит на кнопке "отмена"
@@ -250,7 +273,7 @@ export class NotificationsSetupWizard {
   @Command('exit')
   protected async exitCommand(@Context() ctx: CustomWizardContext) {
     const startMenu = await this.telegramBotUtils.getStartMenu(
-      ctx.callbackQuery.from.id,
+      ctx.message.from.id,
     );
     await this.mm.sendNewMessage(ctx, StartMenuText, startMenu);
     await this.mm.userSentSomething(ctx);

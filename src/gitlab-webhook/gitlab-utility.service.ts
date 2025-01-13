@@ -72,7 +72,6 @@ export class GitlabUtilityService {
 
     let reviewer = null;
     if (this.isApprovalsInfo(approvalsInfo)) {
-      // console.log('it IS approvals info');
       if (approvalsInfo?.approved) {
         // если кто-то апрувнул МР, то ищем ревьюера, который еще не апрувнул его
         const approvedByIds = approvalsInfo.approved_by.map((user) => {

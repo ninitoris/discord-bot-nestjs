@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { NoteWebhookBodyDto } from '@src/gitlab-webhook/dto/note/noteWebhookBody.dto';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
-import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { NotificationService } from '@src/notification-service/notification-service';
 import {
   GeneralNotificationType,
   TextWithURL,
 } from '@src/notification-service/notification-strategy';
+import { UserService } from '@src/user/user.service';
 import { UtilsService } from '@src/utils/utils.service';
 
 @Injectable()
 export class NoteService {
   constructor(
     private readonly gitlabUtils: GitlabUtilityService,
-    private readonly gitlabUserService: GitLabUserService,
+    private readonly userService: UserService,
     private readonly notificationService: NotificationService,
     private readonly utils: UtilsService,
   ) {}
@@ -26,17 +26,23 @@ export class NoteService {
     const mergeRequest = body.merge_request;
 
     const gitlabUser = body.user;
-    const user = await this.gitlabUserService.getUserById(gitlabUser.id);
+    const user = await this.userService.getUserByGitlabID(gitlabUser.id);
 
     let notifyUsersIDs;
     if (note.includes('@')) {
       const reg = /@[a-zA-Z]+/g;
       const findTags = note.match(reg);
       notifyUsersIDs =
-        this.gitlabUserService.getGitlabUserIDsByUserNames(findTags);
+        await this.userService.getGitlabUserIDsByUserNames(findTags);
     }
 
-    if (!notifyUsersIDs) {
+    if (
+      !(
+        notifyUsersIDs &&
+        Array.isArray(notifyUsersIDs) &&
+        notifyUsersIDs.length
+      )
+    ) {
       notifyUsersIDs = [mergeRequest.author_id];
     }
 
@@ -47,7 +53,7 @@ export class NoteService {
     const beautifyNote = objectAttributes.note.trim().replaceAll('```', '`');
 
     const notificationTitle: TextWithURL = {
-      text: `${user.irlName} написал${user.female ? 'а' : ''} коммент к МРу`,
+      text: `${user.name} написал${user.female ? 'а' : ''} коммент к МРу`,
       url: objectAttributes.url,
     };
 

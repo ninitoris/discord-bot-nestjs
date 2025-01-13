@@ -28,6 +28,9 @@ export class TelegramBotUtils {
         Markup.button.callback(NavigationButtons.regiseter, 'registerUser'),
       ]);
     }
+    inlineKeyboardButtons.push([
+      Markup.button.callback(NavigationButtons.close, 'closeMenu'),
+    ]);
     return Markup.inlineKeyboard(inlineKeyboardButtons);
   }
 }

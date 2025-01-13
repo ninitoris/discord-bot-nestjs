@@ -27,11 +27,9 @@ export class TelegramBotUpdate {
   @Start()
   async start(@Ctx() ctx: Context) {
     await this.mm.userSentSomething(ctx);
-    console.dir(ctx, { depth: Infinity });
     const startMenu = await this.telegramBotUtils.getStartMenu(
       (ctx.update as tg.Update.MessageUpdate).message.from.id,
     );
-    console.log('startMenu:', startMenu);
     await this.mm.sendNewMessage(ctx, StartMenuText, startMenu);
     this.mm.cleanUpChat(ctx.chat.id);
   }
@@ -48,7 +46,28 @@ export class TelegramBotUpdate {
   @Hears(NavigationButtons.regiseter)
   @Command('registerUser')
   async regiseterUser(ctx: Scenes.WizardContext) {
-    await ctx.scene.enter('registerUser');
+    const userID = ctx.callbackQuery.from.id;
+    const findExistingRequest =
+      await this.userService.registrationRequestExists(userID);
+    if (findExistingRequest) {
+      const startMenu = await this.telegramBotUtils.getStartMenu(userID);
+      await this.mm.msg(
+        ctx,
+        '🫠 Вы уже отправили заявку на регистрацию.',
+        startMenu,
+      );
+    } else {
+      await ctx.scene.enter('registerUser');
+    }
+  }
+
+  @Action('closeMenu')
+  @Hears(NavigationButtons.close)
+  @Command('closeMenu')
+  async closeMenu(ctx: Scenes.WizardContext) {
+    const chatID = ctx.callbackQuery.from.id;
+    const msgID = ctx.callbackQuery.message.message_id;
+    await this.mm.deleteMessage(chatID, msgID);
   }
 
   @Action('approveUser')
@@ -71,9 +90,7 @@ export class TelegramBotUpdate {
       newUser.telegramUsername = rr.telegramUsername;
       const createdBy = cbq.from.username;
       newUser.createdBy = createdBy;
-      console.log('cbq.message.date', cbq.message.date);
       newUser.createdAt = new Date(cbq.message.date * 1000);
-      console.log('newUser.createdAt', newUser.createdAt);
       newUser.updatedAt = newUser.createdAt;
 
       await this.userService.saveUser(newUser);
@@ -116,14 +133,41 @@ export class TelegramBotUpdate {
 
   @Action('rejectUser')
   async rejectUserHandler(@Ctx() ctx: CustomContext) {
-    console.dir(ctx, { depth: Infinity });
-    // await this.mm.sendMsgInChat(
-    //   registerData.telegramID,
-    //   '🙅‍♂️ Вам отклонено в регистрации',
-    // );
+    if ('callback_query' in ctx.update) {
+      const cbq = ctx.update.callback_query;
+      const msgID = cbq.message.message_id;
+      const rr =
+        await this.userService.getRegistrationRequestByMessageID(msgID);
 
-    // clearRegisterData(registerData);
-    return await this.mm.msg(ctx, '🙅‍♂️ Пользователю отклонено в регистрации');
+      rr.status = 'REJECTED';
+      await this.userService.saveRegistrationRequest(rr);
+
+      const rejectedBy = cbq.from.username;
+
+      const baseHost = this.configService.get(ENVIRONMENT_KEY.GITLAB_BASE_HOST);
+      const userProfileLink = baseHost + rr.gitlabName;
+
+      const messageText = `👀 Пользователь хочет зарегистрироваться\n\n🦊 Ссылка на аккаунт:\n${userProfileLink}\n\n👤 Имя:\n${rr.name}\n\n📱 Телега:\n@${rr.telegramUsername}\n\n🎪 Организация:\n${rr.orgID}\n\n🫵 Пол:\n${rr.female ? 'Женский' : 'Мужской'}\n\n🔔 Получать уведомления в дискорде:\n${rr.discordName ? `Да, на аккаунт ${rr.discordName}` : 'Нет'}\n\n❌ Отклонено: @${rejectedBy}`;
+
+      const extra: ExtraEditMessageText = {
+        link_preview_options: {
+          is_disabled: true, // выключил превью ссылок, потому что ссылки на gitlab.interprocom.ru у нас выглядят не очень красиво
+        },
+      };
+
+      const chatId = this.configService.get<number>('CHAT_ID');
+      await this.mm.editMessage(chatId, msgID, messageText, extra);
+
+      // отправить пользователю сообщение о том, что его заявка одобрена
+      const telegramID = Number(rr.telegramID);
+      const startMenu = await this.telegramBotUtils.getStartMenu(telegramID);
+      await this.mm.sendNewMessage(
+        telegramID,
+        '💀 Вам отклонено в регистрации',
+        startMenu,
+      );
+      await this.mm.cleanUpChat(telegramID);
+    }
   }
 
   @Hears(/.*/)

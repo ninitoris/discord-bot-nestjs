@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
-import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import {
   GeneralNotificationType,
   NotificationStrategy,
 } from '@src/notification-service/notification-strategy';
+import { UserSettings } from '@src/user/entities/usersettings.entity';
+import { UserService } from '@src/user/user.service';
 import { UtilsService } from '@src/utils/utils.service';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
@@ -17,7 +18,7 @@ interface TelegramMessageType extends GeneralNotificationType {}
 export class TelegramNotificationStrategy implements NotificationStrategy {
   constructor(
     @InjectBot() private readonly bot: Telegraf,
-    private readonly gitlabUserService: GitLabUserService,
+    private readonly userService: UserService,
     private readonly utils: UtilsService,
     private readonly configService: ConfigService,
   ) {}
@@ -93,7 +94,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     const usersTelegramIDs: Array<number> = [];
     for (const userId of notifyUsersIDs) {
       const { tag, usersTelegramID } =
-        await this.getTelegramNameAndIdByUserId(userId);
+        await this.getTelegramTagAndIdByUserId(userId);
       if (tag) tags.push(tag);
       if (usersTelegramID) usersTelegramIDs.push(usersTelegramID);
     }
@@ -103,17 +104,43 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     };
   }
 
-  private async getTelegramNameAndIdByUserId(userId: number): Promise<{
-    tag?: string;
-    usersTelegramID?: number;
+  // возвращает упоминания тэги пользователей через @ с учетом настроек уведомлений
+  private async getTelegramTagAndIdByUserId(userId: number): Promise<{
+    tag: string;
+    usersTelegramID: number;
   }> {
-    const user = await this.gitlabUserService.getUserById(userId);
+    const user = await this.userService.getUserByGitlabID(userId, {
+      getNotificationSettings: true,
+    });
     if (!user) return;
 
-    const tag = user.telegramUsername
-      ? '@' + user.telegramUsername
-      : '@ ' + user.irlName;
-    const usersTelegramID = user.telegramID;
+    const userSettings: UserSettings | undefined = user.userSettings;
+    let settings: UserSettings;
+    if (userSettings) {
+      settings = new UserSettings();
+      settings.useTelegram = userSettings.useTelegram;
+      settings.tgGroupChatNotify =
+        userSettings.useTelegram && userSettings.tgGroupChatNotify;
+      settings.tgPrivateMessageNotify =
+        userSettings.useTelegram && userSettings.tgPrivateMessageNotify;
+    } else {
+      // дефолтные настройки
+      settings = new UserSettings();
+      settings.useTelegram = true;
+      settings.tgGroupChatNotify = true;
+      settings.tgPrivateMessageNotify = true;
+    }
+
+    let tag: string = '@';
+    if (user.telegramUsername && settings.tgGroupChatNotify) {
+      tag += user.telegramUsername;
+    } else {
+      tag += user.name;
+    }
+
+    const usersTelegramID = settings.tgPrivateMessageNotify
+      ? user.telegramID
+      : undefined;
 
     return {
       tag,

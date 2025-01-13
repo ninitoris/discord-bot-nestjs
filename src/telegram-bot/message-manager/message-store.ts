@@ -135,7 +135,7 @@ export class MessageStore {
     const res = await this.messagesRepository.softDelete({
       messageID: In(messagesIDs),
     });
-
+    console.log('deleteMessagesByIDs res:');
     console.log(res);
   }
 }

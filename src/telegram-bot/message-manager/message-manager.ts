@@ -21,10 +21,13 @@ export class MessageManager {
     await this.cleanUpBotMessages(chatID);
   }
 
+  async deleteMessage(chatID: number, messageID: number) {
+    await this.store.deleteMessage(chatID, messageID);
+    await this.bot.telegram.deleteMessage(chatID, messageID);
+  }
+
   async cleanUpUserMessages(chatID: number) {
     const userMessages = await this.store.getUserMessagesIDs(chatID);
-    console.log('cleanUpUserMessages');
-    console.log(userMessages);
     if (userMessages.length) {
       const messagesIDs = userMessages.map((msg) => msg.messageID);
       await this.bot.telegram.deleteMessages(chatID, messagesIDs);
@@ -129,8 +132,6 @@ export class MessageManager {
   ) {
     let message: tg.Message.TextMessage;
     let chatID;
-    console.log('typeof chatIdOrCtx');
-    console.log(typeof chatIdOrCtx);
     if (typeof chatIdOrCtx === 'number' || typeof chatIdOrCtx === 'string') {
       chatID = chatIdOrCtx;
       message = await this.sendMsgInChat(chatID, text, extra);
@@ -155,13 +156,10 @@ export class MessageManager {
   }
 
   async userSentSomething(ctx: Context) {
-    console.log('user sent smth!');
     if (
       'callback_query' in ctx.update &&
       'message' in ctx.update.callback_query
     ) {
-      console.log('case 1');
-      console.dir(ctx, { depth: Infinity });
       const chatID = ctx.update.callback_query.message.chat.id;
       const tgBotMessage = new TgBotMessages();
       tgBotMessage.userID = ctx.from.id;
@@ -175,8 +173,6 @@ export class MessageManager {
       tgBotMessage.status = 'NEW';
       await this.store.saveMessage(tgBotMessage);
     } else if ('message' in ctx.update) {
-      console.log('case 2');
-      console.dir(ctx, { depth: Infinity });
       const chatID = ctx.update.message.chat.id;
 
       const tgBotMessage = new TgBotMessages();
@@ -191,9 +187,6 @@ export class MessageManager {
       tgBotMessage.status = 'NEW';
       await this.store.saveMessage(tgBotMessage);
     } else if ('message' in ctx) {
-      console.log('case 3');
-      console.dir(ctx, { depth: Infinity });
-
       const tgBotMessage = new TgBotMessages();
       tgBotMessage.userID = ctx.from.id;
       tgBotMessage.chatID = ctx.chat.id;

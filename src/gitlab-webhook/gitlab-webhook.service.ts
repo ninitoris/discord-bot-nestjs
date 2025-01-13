@@ -4,7 +4,6 @@ import { MergeRequestService } from './services/merge-request.service';
 import { PipelineService } from '@src/gitlab-webhook/services/pipeline.service';
 import { NoteService } from '@src/gitlab-webhook/services/note.service';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
-import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { NotificationService } from '@src/notification-service/notification-service';
 import {
   GeneralNotificationType,
@@ -17,7 +16,6 @@ export class GitlabWebhookService {
     private readonly mergeRequestService: MergeRequestService,
     private readonly pipelineService: PipelineService,
     private readonly notificationService: NotificationService,
-    private readonly gitlabUserService: GitLabUserService,
     private readonly gitlabUtils: GitlabUtilityService,
     private readonly noteService: NoteService,
   ) {}

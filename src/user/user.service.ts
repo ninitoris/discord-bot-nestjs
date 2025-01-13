@@ -19,6 +19,10 @@ export class UserService {
     private readonly registrationRepository: Repository<RegistrationRequest>,
   ) {}
 
+  private readonly dummyUser: Partial<Users> = {
+    name: 'кто-то',
+  };
+
   async createUser(createUserDto: CreateUserDto) {
     const userInfo = await this.gitlabApi.getUserInfo(createUserDto.gitlabName);
     if (!userInfo) {
@@ -136,13 +140,120 @@ export class UserService {
     });
   }
 
+  async registrationRequestExists(tgID: number): Promise<boolean> {
+    return await this.registrationRepository.existsBy({
+      telegramID: tgID,
+      status: 'NEW',
+    });
+  }
+
   async userExists(telegramID: number): Promise<boolean> {
     const res = await this.userRepository.exists({
       where: {
         telegramID: telegramID,
       },
     });
-    console.log('user exists: ', res);
     return res;
+  }
+
+  async getUserByTgID(
+    tgID: number,
+    options: { getNotificationSettings: boolean } = {
+      getNotificationSettings: false,
+    },
+  ) {
+    return await this.userRepository.findOne({
+      where: {
+        telegramID: tgID,
+      },
+      relations: options.getNotificationSettings
+        ? { userSettings: true }
+        : undefined,
+    });
+  }
+
+  /** Возвращает либо пользователя GitLab по указанному ID, либо пользователя-заглушку */
+  async getUserByGitlabID(
+    gitlabUserID: number,
+    options: { getNotificationSettings: boolean } = {
+      getNotificationSettings: false,
+    },
+  ): Promise<Users | Partial<Users>> {
+    const user: Users = await this.userRepository.findOne({
+      where: {
+        gitlabID: gitlabUserID,
+      },
+      relations: options.getNotificationSettings
+        ? { userSettings: true }
+        : undefined,
+    });
+    return user || this.dummyUser;
+    // Пользователь-заглушка используется для того, чтобы приложение не падало при отсутствии реального пользователя, например, когда новый сотрудник еще не был добавлен в базу
+  }
+
+  /** Возвращает либо имя пользователя по его ID, либо заглушку "Кто-то" */
+  async getUserNameById(gitlabUserID: number): Promise<string | 'Кто-то'> {
+    const user = await this.userRepository.findOne({
+      where: {
+        gitlabID: gitlabUserID,
+      },
+      select: {
+        name: true,
+      },
+    });
+    return user?.name || 'Кто-то';
+  }
+
+  /** На вход принимается массив строк - username-ы пользователей гитлаба. Юзернейм может иметь @ в начале.
+   * Возвращает массив id-шников этих пользователей гитлаба
+   */
+  async getGitlabUserIDsByUserNames(
+    usernames: Array<string>,
+  ): Promise<Array<number | undefined>> {
+    if (!usernames.length) return [];
+    const tags: Array<number | undefined> = await Promise.all(
+      usernames.map(async (username) => {
+        const tag = await this.getGitlabUserIdByUserName(username);
+        if (tag) return tag;
+        return undefined;
+      }),
+    );
+    return tags;
+  }
+
+  /** Возвращает id пользователя gitlab по его юзернейму */
+  async getGitlabUserIdByUserName(
+    gitlabUsername: string,
+  ): Promise<number | null> {
+    let cleanedUserName = gitlabUsername;
+    if (gitlabUsername.at(0) === '@') {
+      cleanedUserName = gitlabUsername.slice(1);
+    }
+
+    const user = await this.userRepository.findOne({
+      where: {
+        gitlabName: cleanedUserName,
+      },
+      select: {
+        gitlabID: true,
+      },
+    });
+    return user?.gitlabID || null;
+  }
+
+  async getUserNotificationSettings(userID: number): Promise<UserSettings> {
+    const user = await this.userRepository.findOne({
+      where: {
+        gitlabID: userID,
+      },
+      relations: {
+        userSettings: true,
+      },
+    });
+    return user.userSettings;
+  }
+
+  async saveUserSettings(userSettings: UserSettings) {
+    await this.userSettingsRepository.save([userSettings]);
   }
 }

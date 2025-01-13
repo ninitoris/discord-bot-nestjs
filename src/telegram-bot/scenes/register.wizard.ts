@@ -10,7 +10,6 @@ import {
 } from 'nestjs-telegraf';
 import { Markup, Scenes, Telegraf } from 'telegraf';
 import {
-  ChatContext,
   RegisterData,
   RegisterWizardContext,
 } from '../types/telegram-bot-types';
@@ -120,7 +119,7 @@ export class RegisterWizard {
     const name = ctx.session.name ?? ctx.session.gitlabUserInfo.name;
     const validName = validateAndFormatName(name);
     if (!validName) {
-      const msgText = `👤 Ваше имя и фамилия должны быть на русском языке\n❌ ${name}`;
+      const msgText = `👤 Введите имя и фамилию в формате Имя Фамилия\n❌ ${name}`;
       const msgButtons = Markup.inlineKeyboard([
         [Markup.button.callback('📝 Изменить имя', 'nameIsWrong')],
         this.backButton,
@@ -129,6 +128,7 @@ export class RegisterWizard {
       this.mm.cleanUpChat(ctx.chat.id);
       return;
     }
+    ctx.session.name = name;
     const msgText = `👤 Имя и фамилия верные?\n${name}`;
 
     const msgButtons = Markup.inlineKeyboard([
@@ -146,7 +146,6 @@ export class RegisterWizard {
 
   @Action('nameIsRight')
   protected async nameIsRight(@Context() ctx: RegisterWizardContext) {
-    ctx.session.name = ctx.session.gitlabUserInfo.name;
     ctx.wizard.selectStep(Steps.selectOrganization);
     await this.selectOrganization(ctx);
   }
@@ -155,7 +154,7 @@ export class RegisterWizard {
   protected async nameIsWrong(@Context() ctx: RegisterWizardContext) {
     await this.mm.msg(
       ctx,
-      '👀 Введите новое имя в формате Имя Фамилия',
+      '👀 Введите имя и фамилию в формате Имя Фамилия',
       this.goBackButton,
     );
 
