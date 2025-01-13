@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { CiJobDto } from '@src/gitlab-webhook/dto/pipeline/ciJob.dto';
 import { PipelineWebhookBodyDto } from '@src/gitlab-webhook/dto/pipeline/pipelineWebhookBody.dto';
 import { GitlabUtilityService } from '@src/gitlab-webhook/gitlab-utility.service';
-import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { NotificationService } from '@src/notification-service/notification-service';
 import {
   GeneralNotificationType,
@@ -16,7 +15,6 @@ export class PipelineService {
     private readonly notificationService: NotificationService,
     private readonly gitlabUtils: GitlabUtilityService,
     private readonly utils: UtilsService,
-    private readonly gitlabUserService: GitLabUserService,
   ) {}
 
   private async handleFailedPipeline(body: PipelineWebhookBodyDto) {

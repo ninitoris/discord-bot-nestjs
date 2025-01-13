@@ -9,12 +9,12 @@ services:
       POSTGRES_PASSWORD: DontEatWatermelons
       POSTGRES_DB: gitlab_notifications
     ports:
-      - "2326:5432"
+      - '2326:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   discordbot:
-    image: $CI_REGISTRY_IMAGE:latest  
+    image: $CI_REGISTRY_IMAGE:latest
     container_name: $CONTAINER_NAME
     restart: always
     environment:
@@ -24,7 +24,7 @@ services:
       DB_PASSWORD: DontEatWatermelons
       DB_NAME: gitlab_notifications
     ports:
-      - "$PORT:8444"
+      - '$PORT:8444'
 
 volumes:
   postgres_data:

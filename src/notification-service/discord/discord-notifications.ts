@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENVIRONMENT_KEY } from '@src/constants/env-keys';
-import { GitLabUserService } from '@src/gitlab-webhook/services/gitlab-user.service';
 import { DiscordNotificationType } from '@src/notification-service/discord/types/discord-notifications-types';
 import { NotificationStrategy } from '@src/notification-service/notification-strategy';
+import { UserService } from '@src/user/user.service';
 import { UtilsService } from '@src/utils/utils.service';
 import { EmbedBuilder, WebhookClient } from 'discord.js';
 
 @Injectable()
 export class DiscordNotificationStrategy implements NotificationStrategy {
   constructor(
-    private readonly gitLabUserService: GitLabUserService,
     private readonly configService: ConfigService,
     private readonly utils: UtilsService,
+    private readonly userService: UserService,
   ) {}
 
   public readonly gitlabColor = 0xfc6d26;
@@ -60,20 +60,22 @@ export class DiscordNotificationStrategy implements NotificationStrategy {
     return;
   }
 
-  getDiscordTagsByUserIds(
+  async getDiscordTagsByUserIds(
     /** Массив id-шников пользователей гитлаба */
     userIds: Array<number>,
     /** Высылать ли уведомления. Если true, то возвращает строку, которая будет тэгать пользователей в сообщении. Если false, то возвращает только имена пользователей, чтобы было понятно, кому адресовано сообщение, но уведомления не будет */
     notify: boolean = true,
-  ): string {
-    const tagsArray: Array<string> = userIds.map((userId) => {
-      if (this.gitLabUserService.gitlabUsersMap.has(userId)) {
-        if (notify) {
-          return `<@${this.gitLabUserService.gitlabUsersMap.get(userId).discordId.toString()}>`;
-        } else
-          return `@${this.gitLabUserService.gitlabUsersMap.get(userId).irlName}`;
-      } else return userId.toString(); // TODO: получить имя пользователя из гитлаба
-    });
+  ): Promise<string> {
+    const tagsArray: Array<string> = await Promise.all(
+      userIds.map(async (userId) => {
+        const user = await this.userService.getUserByGitlabID(userId);
+        if (user) {
+          if (notify) {
+            return `<@${user.discordID?.toString()}>`;
+          } else return `@${user.name}`;
+        } else return userId.toString(); // TODO: получить имя пользователя из гитлаба
+      }),
+    );
 
     return tagsArray.join(' ');
   }

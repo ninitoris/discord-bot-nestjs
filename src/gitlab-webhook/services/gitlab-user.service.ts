@@ -1,8 +1,3 @@
-// TODO: тут должна быть бд через orm-ку, но пока что да
-
-import { Injectable } from '@nestjs/common';
-import { GitLabApiService } from '@src/gitlab-api/gitlab-api.service';
-
 type UserType = {
   /** ID пользоателя в гитлабе */
   gitlabId: number;
@@ -17,17 +12,9 @@ type UserType = {
   telegramUsername?: string;
 };
 
-@Injectable()
 export class GitLabUserService {
-  public gitlabUsersMap: Map<number, UserType> = new Map();
+  constructor() {}
 
-  constructor(private readonly gitlabApiService: GitLabApiService) {
-    Object.values(this.usersMap).forEach((user) => {
-      this.gitlabUsersMap.set(user.gitlabId, user);
-    });
-  }
-
-  // зменить на бд
   private readonly usersMap: { [key: string]: UserType } = {
     SSirotinin: {
       gitlabId: 102,
@@ -232,72 +219,4 @@ export class GitLabUserService {
       irlName: 'Александр Глинов',
     },
   };
-
-  private readonly dummyUser: UserType = {
-    gitlabId: null,
-    discordId: undefined,
-    female: false,
-    irlName: 'кто-то',
-  };
-
-  /** На вход принимается массив строк - username-ы пользователей гитлаба. Юзернейм может иметь @ в начале.
-   * Возвращает массив id-шников этих пользователей гитлаба
-   */
-  getGitlabUserIDsByUserNames(
-    usernames: Array<string>,
-  ): Array<number | undefined> {
-    if (!usernames.length) return [];
-    const tags: Array<number | undefined> = usernames.map((username) => {
-      const tag = this.getGitlabUserIdByUserName(username);
-      if (tag) return tag;
-    });
-    return tags;
-  }
-
-  /** Возвращает id пользователя gitlab по его юзернейму */
-  getGitlabUserIdByUserName(username: string): number | null {
-    let cleanedUserName = username;
-    if (username.at(0) === '@') {
-      cleanedUserName = username.slice(1);
-    }
-
-    return this.usersMap[cleanedUserName]?.gitlabId || null;
-  }
-
-  /** Возвращает либо имя пользователя по его ID, либо заглушку "Кто-то" */
-  async getUserNameById(userId: number): Promise<string | 'Кто-то'> {
-    const userName = this.gitlabUsersMap.get(userId)?.irlName;
-    if (userName) return userName;
-
-    const gitlabUserInfo = await this.gitlabApiService.getUserInfo(userId);
-    const gitlabUserName = gitlabUserInfo.name;
-    if (gitlabUserName) return gitlabUserName;
-
-    return 'Кто-то';
-  }
-
-  /** Возвращает либо пользователя GitLab по указанному ID, либо пользователя-заглушку */
-  async getUserById(userId: number): Promise<UserType> {
-    const user = this.gitlabUsersMap.get(userId);
-    if (user) {
-      return user;
-    }
-
-    const gitlabUserInfo = await this.gitlabApiService.getUserInfo(userId);
-    if (!gitlabUserInfo) {
-      // Пользователь-заглушка используется для того, чтобы приложение не падало при отсутствии реального пользователя, например, когда новый сотрудник еще не был добавлен в базу
-      return this.dummyUser;
-    }
-
-    const createUser: UserType = {
-      gitlabId: gitlabUserInfo.id,
-      irlName: gitlabUserInfo.name,
-    };
-
-    return createUser;
-  }
-
-  isFemale(userId: number): boolean {
-    return this.gitlabUsersMap.get(userId)?.female || false;
-  }
 }

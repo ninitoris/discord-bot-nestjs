@@ -9,6 +9,12 @@ import { UtilsModule } from '@src/utils/utils.module';
 import { UtilsService } from '@src/utils/utils.service';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { session } from 'telegraf';
+import { RegisterWizard } from './scenes/register.wizard';
+import { GitLabApiModule } from '../gitlab-api/gitlab-api.module';
+import { UserModule } from '../user/user.module';
+import { TgBotMessages } from '@src/telegram-bot/entities/tg-bot-messages.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TelegramBotUtils } from './utils/telegram-bot.utils';
 
 @Module({
   imports: [
@@ -20,6 +26,9 @@ import { session } from 'telegraf';
         token: configService.get<string>('TELEGRAM_TOKEN'),
       }),
     }),
+    TypeOrmModule.forFeature([TgBotMessages]),
+    GitLabApiModule,
+    UserModule,
   ],
   providers: [
     TelegramBotUpdate,
@@ -28,6 +37,8 @@ import { session } from 'telegraf';
     UtilsService,
     MessageStore,
     MessageManager,
+    TelegramBotUtils,
+    RegisterWizard,
   ],
   exports: [],
 })
