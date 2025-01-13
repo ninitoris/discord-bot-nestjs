@@ -17,6 +17,7 @@ export class UserService {
     private readonly gitlabApi: GitLabApiService,
     @InjectRepository(RegistrationRequest)
     private readonly registrationRepository: Repository<RegistrationRequest>,
+    private readonly gitlabApiService: GitLabApiService,
   ) {}
 
   private readonly dummyUser: Partial<Users> = {
@@ -187,8 +188,22 @@ export class UserService {
         ? { userSettings: true }
         : undefined,
     });
-    return user || this.dummyUser;
-    // Пользователь-заглушка используется для того, чтобы приложение не падало при отсутствии реального пользователя, например, когда новый сотрудник еще не был добавлен в базу
+
+    if (user) return user;
+
+    const gitlabUserInfo =
+      await this.gitlabApiService.getUserInfo(gitlabUserID);
+    if (!gitlabUserInfo) {
+      // Пользователь-заглушка используется для того, чтобы приложение не падало при отсутствии реального пользователя, например, когда новый сотрудник еще не был добавлен в базу
+      return this.dummyUser;
+    }
+
+    const createUser = new Users();
+    createUser.gitlabID = gitlabUserInfo.id;
+    createUser.name = gitlabUserInfo.name;
+    createUser.gitlabName = gitlabUserInfo.username;
+
+    return createUser;
   }
 
   /** Возвращает либо имя пользователя по его ID, либо заглушку "Кто-то" */
