@@ -114,8 +114,8 @@ export class MessageStore {
     message: TgBotMessages,
   ): Promise<void> {
     const res = await this.messagesRepository.save(message);
-    console.log('saveMessage res:');
-    console.log(res);
+    // console.log('saveMessage res:');
+    // console.log(res);
   }
 
   // public async saveUserMessage(message: TgBotMessages) {
@@ -131,8 +131,9 @@ export class MessageStore {
     console.log(res);
   }
 
-  public async deleteMessagesByIDs(messagesIDs: Array<number>) {
+  public async deleteMessagesByIDs(chatID: number, messagesIDs: Array<number>) {
     const res = await this.messagesRepository.softDelete({
+      chatID: chatID,
       messageID: In(messagesIDs),
     });
     console.log('deleteMessagesByIDs res:');
