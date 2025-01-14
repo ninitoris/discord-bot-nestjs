@@ -155,6 +155,32 @@ export class MessageManager {
     return message;
   }
 
+  async chatIsPrivate(ctx: Context) {
+    console.log('artarst');
+    console.dir(ctx, {
+      depth: Infinity,
+    });
+    const chatType = await this.getChatType(ctx);
+    return chatType === 'private';
+  }
+
+  async getChatType(ctx: Context) {
+    if (
+      'callback_query' in ctx.update &&
+      'message' in ctx.update.callback_query
+    ) {
+      return ctx.update.callback_query.message.chat.type;
+    } else if ('message' in ctx.update) {
+      return ctx.update.message.chat.type;
+    } else if ('message' in ctx) {
+      return ctx.chat.type;
+    } else {
+      Logger.error('Not found message in ctx');
+      console.log(ctx);
+      return undefined;
+    }
+  }
+
   async userSentSomething(ctx: Context) {
     if (
       'callback_query' in ctx.update &&

@@ -26,6 +26,11 @@ export class TelegramBotUpdate {
 
   @Start()
   async start(@Ctx() ctx: Context) {
+    console.log('start');
+    const chatIsPrivate = await this.mm.chatIsPrivate(ctx);
+    console.log('chatIsPrivate', chatIsPrivate);
+    if (!chatIsPrivate) return;
+
     await this.mm.userSentSomething(ctx);
     const startMenu = await this.telegramBotUtils.getStartMenu(
       (ctx.update as tg.Update.MessageUpdate).message.from.id,
@@ -38,7 +43,9 @@ export class TelegramBotUpdate {
   @Hears(NavigationButtons.notificationsConfig)
   @Command('notifications')
   async notificationsSetup(ctx: Scenes.WizardContext) {
-    // проверить, есть ли этот пользователь в банке. Если нет, то не заходить в сцену
+    const chatIsPrivate = await this.mm.chatIsPrivate(ctx);
+    if (!chatIsPrivate) return;
+
     await ctx.scene.enter('notificationsSetup');
   }
 
@@ -46,6 +53,9 @@ export class TelegramBotUpdate {
   @Hears(NavigationButtons.regiseter)
   @Command('registerUser')
   async regiseterUser(ctx: Scenes.WizardContext) {
+    const chatIsPrivate = await this.mm.chatIsPrivate(ctx);
+    if (!chatIsPrivate) return;
+
     const userID = ctx.callbackQuery.from.id;
     const findExistingRequest =
       await this.userService.registrationRequestExists(userID);
@@ -172,6 +182,9 @@ export class TelegramBotUpdate {
 
   @Hears(/.*/)
   protected async onAnyText(@Ctx() ctx: CustomContext) {
+    const chatIsPrivate = await this.mm.chatIsPrivate(ctx);
+    if (!chatIsPrivate) return;
+
     await this.mm.userSentSomething(ctx);
   }
 }
