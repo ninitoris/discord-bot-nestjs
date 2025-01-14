@@ -207,7 +207,7 @@ export class UserService {
   }
 
   /** Возвращает либо имя пользователя по его ID, либо заглушку "Кто-то" */
-  async getUserNameById(gitlabUserID: number): Promise<string | 'Кто-то'> {
+  async getUserNameById(gitlabUserID: number): Promise<string> {
     const user = await this.userRepository.findOne({
       where: {
         gitlabID: gitlabUserID,
@@ -216,7 +216,15 @@ export class UserService {
         name: true,
       },
     });
-    return user?.name || 'Кто-то';
+
+    if (user) return user.name;
+
+    const gitlabUserInfo =
+      await this.gitlabApiService.getUserInfo(gitlabUserID);
+    if (gitlabUserInfo) {
+      return gitlabUserInfo.name;
+    }
+    return this.dummyUser.name;
   }
 
   /** На вход принимается массив строк - username-ы пользователей гитлаба. Юзернейм может иметь @ в начале.
