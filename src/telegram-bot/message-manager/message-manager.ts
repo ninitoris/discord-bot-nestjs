@@ -31,7 +31,7 @@ export class MessageManager {
     if (userMessages.length) {
       const messagesIDs = userMessages.map((msg) => msg.messageID);
       await this.bot.telegram.deleteMessages(chatID, messagesIDs);
-      await this.store.deleteMessagesByIDs(messagesIDs);
+      await this.store.deleteMessagesByIDs(chatID, messagesIDs);
     }
   }
 
@@ -41,7 +41,7 @@ export class MessageManager {
       const messagesIDs = botMessages.map((msg) => msg.messageID);
       // const lastBotMessage = messagesIDs[messagesIDs.length - 1];
       const messagesToDelete = messagesIDs.slice(0, -1);
-      await this.store.deleteMessagesByIDs(messagesToDelete);
+      await this.store.deleteMessagesByIDs(chatID, messagesToDelete);
       await this.bot.telegram.deleteMessages(chatID, messagesToDelete);
     }
   }

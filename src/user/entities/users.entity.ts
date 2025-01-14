@@ -31,7 +31,7 @@ export class Users {
   @Column({ nullable: true })
   discordID: string | null;
 
-  @Column({ nullable: true })
+  @Column('bigint', { nullable: true })
   telegramID: number | null;
 
   @Column({ nullable: true })
