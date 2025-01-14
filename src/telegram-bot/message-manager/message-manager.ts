@@ -174,10 +174,6 @@ export class MessageManager {
   }
 
   async chatIsPrivate(ctx: Context) {
-    console.log('artarst');
-    console.dir(ctx, {
-      depth: Infinity,
-    });
     const chatType = await this.getChatType(ctx);
     return chatType === 'private';
   }
