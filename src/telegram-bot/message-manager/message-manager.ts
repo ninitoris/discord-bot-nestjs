@@ -23,14 +23,22 @@ export class MessageManager {
 
   async deleteMessage(chatID: number, messageID: number) {
     await this.store.deleteMessage(chatID, messageID);
-    await this.bot.telegram.deleteMessage(chatID, messageID);
+    try {
+      await this.bot.telegram.deleteMessage(chatID, messageID);
+    } catch (error) {
+      Logger.error(error);
+    }
   }
 
   async cleanUpUserMessages(chatID: number) {
     const userMessages = await this.store.getUserMessagesIDs(chatID);
     if (userMessages.length) {
       const messagesIDs = userMessages.map((msg) => msg.messageID);
-      await this.bot.telegram.deleteMessages(chatID, messagesIDs);
+      try {
+        await this.bot.telegram.deleteMessages(chatID, messagesIDs);
+      } catch (error) {
+        Logger.error(error);
+      }
       await this.store.deleteMessagesByIDs(chatID, messagesIDs);
     }
   }
@@ -42,7 +50,11 @@ export class MessageManager {
       // const lastBotMessage = messagesIDs[messagesIDs.length - 1];
       const messagesToDelete = messagesIDs.slice(0, -1);
       await this.store.deleteMessagesByIDs(chatID, messagesToDelete);
-      await this.bot.telegram.deleteMessages(chatID, messagesToDelete);
+      try {
+        await this.bot.telegram.deleteMessages(chatID, messagesToDelete);
+      } catch (error) {
+        Logger.error(error);
+      }
     }
   }
 
@@ -55,18 +67,24 @@ export class MessageManager {
     if (!lastBotMessage) {
       return undefined;
     }
-    const message = await this.bot.telegram.editMessageText(
-      chatId,
-      lastBotMessage,
-      undefined,
-      text,
-      extra,
-    );
-    if (typeof message === 'boolean') {
-      Logger.error('Failed to edit latest message');
+
+    try {
+      const message = await this.bot.telegram.editMessageText(
+        chatId,
+        lastBotMessage,
+        undefined,
+        text,
+        extra,
+      );
+      if (typeof message === 'boolean') {
+        Logger.error('Failed to edit latest message');
+        return undefined;
+      } else {
+        return message;
+      }
+    } catch (error) {
+      Logger.error(error);
       return undefined;
-    } else {
-      return message;
     }
   }
 
