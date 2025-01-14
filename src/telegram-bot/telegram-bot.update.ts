@@ -26,9 +26,7 @@ export class TelegramBotUpdate {
 
   @Start()
   async start(@Ctx() ctx: Context) {
-    console.log('start');
     const chatIsPrivate = await this.mm.chatIsPrivate(ctx);
-    console.log('chatIsPrivate', chatIsPrivate);
     if (!chatIsPrivate) return;
 
     await this.mm.userSentSomething(ctx);
