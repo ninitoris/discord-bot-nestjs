@@ -66,16 +66,6 @@ export class MessageStore {
     return botMessagesIDs;
   }
 
-  // public async saveBotMessages(
-  //   // chatID: number,
-  //   messages: Array<TgBotMessages>,
-  // ): Promise<void> {
-  //   // for (const message of messages) {
-  //   //   this.messagesRepository.(message);
-  //   // }
-  //   this.messagesRepository.save(messages);
-  // }
-
   public async getUserMessages(chatID: number): Promise<Array<TgBotMessages>> {
     const userMessages = await this.messagesRepository.find({
       where: {
@@ -102,13 +92,6 @@ export class MessageStore {
     return userMessagesIDs;
   }
 
-  // public async setUserMessages(
-  //   // chatID: number,
-  //   messages: TgBotMessages,
-  // ): Promise<void> {
-  //   this.messagesRepository.save(messages);
-  // }
-
   public async saveMessage(
     // chatID: number,
     message: TgBotMessages,
@@ -117,10 +100,6 @@ export class MessageStore {
     // console.log('saveMessage res:');
     // console.log(res);
   }
-
-  // public async saveUserMessage(message: TgBotMessages) {
-  //   this.messagesRepository.save(message);
-  // }
 
   public async deleteMessage(chatID: number, messageID: number) {
     const res = await this.messagesRepository.softDelete({

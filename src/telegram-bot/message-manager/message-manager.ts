@@ -160,6 +160,11 @@ export class MessageManager {
       'callback_query' in ctx.update &&
       'message' in ctx.update.callback_query
     ) {
+      const chatType = ctx.update.callback_query.message.chat.type;
+      if (chatType !== 'private') {
+        return;
+      }
+
       const chatID = ctx.update.callback_query.message.chat.id;
       const tgBotMessage = new TgBotMessages();
       tgBotMessage.userID = ctx.from.id;
@@ -173,6 +178,11 @@ export class MessageManager {
       tgBotMessage.status = 'NEW';
       await this.store.saveMessage(tgBotMessage);
     } else if ('message' in ctx.update) {
+      const chatType = ctx.update.message.chat.type;
+      if (chatType !== 'private') {
+        return;
+      }
+
       const chatID = ctx.update.message.chat.id;
 
       const tgBotMessage = new TgBotMessages();
@@ -187,6 +197,11 @@ export class MessageManager {
       tgBotMessage.status = 'NEW';
       await this.store.saveMessage(tgBotMessage);
     } else if ('message' in ctx) {
+      const chatType = ctx.chat.type;
+      if (chatType !== 'private') {
+        return;
+      }
+
       const tgBotMessage = new TgBotMessages();
       tgBotMessage.userID = ctx.from.id;
       tgBotMessage.chatID = ctx.chat.id;
