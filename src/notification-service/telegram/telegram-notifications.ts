@@ -141,7 +141,7 @@ export class TelegramNotificationStrategy implements NotificationStrategy {
     if (user.telegramUsername && settings.tgGroupChatNotify) {
       tag += user.telegramUsername;
     } else {
-      tag += user.name;
+      tag += ' ' + user.name;
     }
 
     const usersTelegramID = settings.tgPrivateMessageNotify
